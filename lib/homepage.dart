@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                         ExternalLaunchUrl(
                             "https://www.youtube.com/@NSIdeas");
                       },
-                      child: Image.asset("assets/logo.png"),
+                      child: SizedBox(height:35,width:105,child: Image.asset("assets/logo.png"),),
                     ),
                     InkWell(
                       onTap: () {

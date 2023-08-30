@@ -15,7 +15,7 @@ import 'functions.dart';
 import 'imageZoom.dart';
 import 'main.dart';
 import 'settings.dart';
-
+import 'homepage.dart';
 class sensorsAndComponents extends StatefulWidget {
   const sensorsAndComponents({Key? key}) : super(key: key);
 
@@ -558,110 +558,32 @@ class _sensorState extends State<sensor> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black54,
-      body: SafeArea(
-        child: CustomScrollView(
+    return backGroundImage(
+        child:    SingleChildScrollView(
           physics: BouncingScrollPhysics(),
-          slivers: <Widget>[
-            SliverAppBar(
-              shadowColor: Colors.transparent,
-              toolbarHeight: 52,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
-              flexibleSpace: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white30,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        InkWell(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(color: Colors.white54),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(3.0),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: Colors.white70,
-                                size: 30,
-                              ),
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        Flexible(
-                          child: widget.name.length >
-                                  20 // Adjust the condition based on your requirements
-                              ? Marquee(
-                                  text: widget.name,
-                                  style: TextStyle(
-                                      fontSize: 30, color: Colors.white),
-                                  scrollAxis: Axis.horizontal,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  blankSpace: 20.0,
-                                  velocity: 100.0,
-                                  pauseAfterRound: Duration(seconds: 1),
-                                  startPadding: 0.0,
-                                  accelerationDuration: Duration(seconds: 1),
-                                  accelerationCurve: Curves.linear,
-                                  decelerationDuration:
-                                      Duration(milliseconds: 500),
-                                  decelerationCurve: Curves.easeOut,
-
-                                  // Rest of the Marquee widget properties...
-                                )
-                              : Text(
-                                  widget.name,
-                                  style: TextStyle(
-                                      fontSize: 30,
-                                      color: Colors.white,
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                        ),
-                        InkWell(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(color: Colors.white54),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(3.0),
-                              child: Icon(
-                                Icons.comment,
-                                color: Colors.white70,
-                                size: 30,
-                              ),
-                            ),
-                          ),
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              floating: true,
-              primary: true,
+          child: Column(
+          children: [
+            scrollingImages(
+              images: images, typeOfProject: 'sensors', id: widget.id,
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  scrollingImages(
-                    images: images, typeOfProject: 'sensors', id: widget.id,
+
+            Padding(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(3.0),
+                    decoration: BoxDecoration(color: Colors.orangeAccent),
+                    child: Center(
+                      child: Text(
+                        "About Sensor",
+                        style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -670,682 +592,379 @@ class _sensorState extends State<sensor> {
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(3.0),
-                          decoration: BoxDecoration(color: Colors.orangeAccent),
-                          child: Center(
-                            child: Text(
-                              "About Sensor",
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Description(c0: "sensors", d0: widget.id, c1: "", d1: "", typeOfProject: "sensors")
-                      ],
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(3.0),
+                    decoration: BoxDecoration(color: Colors.orangeAccent),
+                    child: Center(
+                      child: Text(
+                        "Technical Parameters",
+                        style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(3.0),
-                          decoration: BoxDecoration(color: Colors.orangeAccent),
-                          child: Center(
-                            child: Text(
-                              "Technical Parameters",
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: widget.technicalParameters
+                            .split(";")
+                            .length +
+                            1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Table(
+                              border: TableBorder.all(
+                                  width: 0.8,
+                                  color: Colors.white70,
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10),
+                                      topLeft: Radius.circular(10))),
+                              defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                              columnWidths: {
+                                0: FractionColumnWidth(0.5),
+                                1: FractionColumnWidth(0.5),
+                              },
+                              children: [
+                                TableRow(
+                                  decoration: BoxDecoration(
+                            borderRadius:
+                            BorderRadius.only(
+                            topRight: Radius
+                                .circular(10),
+                          topLeft: Radius
+                              .circular(
+                          10)),
+                                      color:
+                                      Colors.grey.withOpacity(0.3)),
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        textAlign: TextAlign.center,
+                                        'Technical Parameters',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        textAlign: TextAlign.center,
+                                        'Description',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          } else {
+                            String subTechnicalParameters = widget
+                                .technicalParameters
+                                .split(";")[index - 1];
+                            return Table(
+                              border: TableBorder.all(
+                                  width: 0.5,
+                                  color: Colors.white54,
+                                  borderRadius: index ==
+                                      widget.technicalParameters
+                                          .split(";")
+                                          .length
+                                      ? BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight:
+                                      Radius.circular(10))
+                                      : BorderRadius.circular(0)),
+                              defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                              columnWidths: {
+                                0: FractionColumnWidth(0.5),
+                                1: FractionColumnWidth(0.5),
+                              },
+                              children: [
+                                TableRow(
+                                  children: [
+                                    TableCell(
+                                      child: Padding(
+                                        padding:
+                                        const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          textAlign: TextAlign.center,
+                                          subTechnicalParameters
+                                              .split(":")
+                                              .first,
+                                          style: TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding:
+                                        const EdgeInsets.all(8.0),
+                                        child: Text(
+                                            textAlign: TextAlign.center,
+                                            subTechnicalParameters
+                                                .split(":")
+                                                .last,
+                                            style: TextStyle(
+                                                color: Colors.white)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      )),
+                  Text(
+                    "         ${widget.description}",
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 18),
+                  ),
+                  if (widget.pinDiagram.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Column(
+                        children: [
+                          Text(
+                            "PinOut",
+                            style: TextStyle(
+                                color: Colors.orangeAccent,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              height: 2,
+                              width: 55,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5)),
                             ),
                           ),
-                        ),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: widget.technicalParameters
-                                      .split(";")
-                                      .length +
-                                  1,
-                              itemBuilder: (context, index) {
-                                if (index == 0) {
-                                  return Table(
-                                    border: TableBorder.all(
-                                        width: 0.8,
-                                        color: Colors.white70,
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(10),
-                                            topLeft: Radius.circular(10))),
-                                    defaultVerticalAlignment:
-                                        TableCellVerticalAlignment.middle,
-                                    columnWidths: {
-                                      0: FractionColumnWidth(0.5),
-                                      1: FractionColumnWidth(0.5),
-                                    },
-                                    children: [
-                                      TableRow(
-                                        decoration: BoxDecoration(
-                                            color:
-                                                Colors.grey.withOpacity(0.3)),
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              textAlign: TextAlign.center,
-                                              'Technical Parameters',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.orange,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              textAlign: TextAlign.center,
-                                              'Description',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.orange,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                } else {
-                                  String subTechnicalParameters = widget
-                                      .technicalParameters
-                                      .split(";")[index - 1];
-                                  return Table(
-                                    border: TableBorder.all(
-                                        width: 0.5,
-                                        color: Colors.white54,
-                                        borderRadius: index ==
-                                                widget.technicalParameters
-                                                    .split(";")
-                                                    .length
-                                            ? BorderRadius.only(
-                                                bottomLeft: Radius.circular(10),
-                                                bottomRight:
-                                                    Radius.circular(10))
-                                            : BorderRadius.circular(0)),
-                                    defaultVerticalAlignment:
-                                        TableCellVerticalAlignment.middle,
-                                    columnWidths: {
-                                      0: FractionColumnWidth(0.5),
-                                      1: FractionColumnWidth(0.5),
-                                    },
-                                    children: [
-                                      TableRow(
-                                        children: [
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                textAlign: TextAlign.center,
-                                                subTechnicalParameters
-                                                    .split(":")
-                                                    .first,
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                  textAlign: TextAlign.center,
-                                                  subTechnicalParameters
-                                                      .split(":")
-                                                      .last,
-                                                  style: TextStyle(
-                                                      color: Colors.white)),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                }
-                              },
-                            )),
-                        Text(
-                          "         ${widget.description}",
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 18),
-                        ),
-                        if (widget.pinDiagram.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Column(
+                          InkWell(
+                            child: Container(
+                              height: 250,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(15),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                        widget.pinDiagram),
+                                    fit: BoxFit.cover,
+                                  )),
+                            ),
+                            onTap: () {
+                              showToastText(longPressToViewImage);
+                            },
+                            onLongPress: () {
+                              if (widget.pinDiagram.length > 3) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => zoom(
+                                            typeOfProject: '', id: '',
+                                            url:
+                                            widget.pinDiagram)));
+                              } else {
+                                showToastText(noImageUrl);
+                              }
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount:
+                        widget.pinConnection.split(";").length +
+                            1, // Number of rows including the header
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Column(
                               children: [
                                 Text(
-                                  "PinOut",
+                                  "Pin Connections",
                                   style: TextStyle(
                                       color: Colors.orangeAccent,
                                       fontSize: 25,
                                       fontWeight: FontWeight.w500),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(bottom: 8),
+                                  padding:
+                                  const EdgeInsets.only(bottom: 8),
                                   child: Container(
                                     height: 2,
-                                    width: 55,
+                                    width: 100,
                                     decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.circular(5)),
+                                        borderRadius:
+                                        BorderRadius.circular(5)),
                                   ),
                                 ),
-                                InkWell(
-                                  child: Container(
-                                    height: 250,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        color: Colors.black54,
-                                        borderRadius: BorderRadius.circular(15),
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                              widget.pinDiagram),
-                                          fit: BoxFit.cover,
-                                        )),
-                                  ),
-                                  onTap: () {
-                                    showToastText(longPressToViewImage);
+                                Table(
+                                  border: TableBorder.all(
+                                      width: 0.8,
+                                      color: Colors.white70,
+
+                                      borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(10),
+                                          topLeft: Radius.circular(10))),
+                                  defaultVerticalAlignment:
+                                  TableCellVerticalAlignment.middle,
+                                  columnWidths: {
+                                    0: FractionColumnWidth(0.5),
+                                    1: FractionColumnWidth(0.5),
                                   },
-                                  onLongPress: () {
-                                    if (widget.pinDiagram.length > 3) {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => zoom(
-                                                  typeOfProject: '', id: '',
-                                                  url:
-                                                      widget.pinDiagram)));
-                                    } else {
-                                      showToastText(noImageUrl);
-                                    }
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 50),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount:
-                                  widget.pinConnection.split(";").length +
-                                      1, // Number of rows including the header
-                              itemBuilder: (context, index) {
-                                if (index == 0) {
-                                  return Column(
-                                    children: [
-                                      Text(
-                                        "Pin Connections",
-                                        style: TextStyle(
-                                            color: Colors.orangeAccent,
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8),
-                                        child: Container(
-                                          height: 2,
-                                          width: 100,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
-                                        ),
-                                      ),
-                                      Table(
-                                        border: TableBorder.all(
-                                            width: 0.8,
-                                            color: Colors.white70,
-                                            borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(10),
-                                                topLeft: Radius.circular(10))),
-                                        defaultVerticalAlignment:
-                                            TableCellVerticalAlignment.middle,
-                                        columnWidths: {
-                                          0: FractionColumnWidth(0.5),
-                                          1: FractionColumnWidth(0.5),
-                                        },
-                                        children: [
-                                          TableRow(
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey
-                                                    .withOpacity(0.3)),
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  'Module',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    color: Colors.orange,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  'Uno',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    color: Colors.orange,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                } else {
-                                  String subTechnicalParameters = widget
-                                      .pinConnection
-                                      .split(";")[index - 1];
-                                  return Table(
-                                    border: TableBorder.all(
-                                        width: 0.5,
-                                        color: Colors.white54,
-                                        borderRadius: index ==
-                                                widget.pinConnection
-                                                    .split(";")
-                                                    .length
-                                            ? BorderRadius.only(
-                                                bottomLeft: Radius.circular(10),
-                                                bottomRight:
-                                                    Radius.circular(10))
-                                            : BorderRadius.circular(0)),
-                                    defaultVerticalAlignment:
-                                        TableCellVerticalAlignment.middle,
-                                    columnWidths: {
-                                      0: FractionColumnWidth(0.5),
-                                      1: FractionColumnWidth(0.5),
-                                    },
-                                    children: [
-                                      TableRow(
-                                        children: [
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                subTechnicalParameters
-                                                    .split(":")
-                                                    .first,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                  subTechnicalParameters
-                                                      .split(":")
-                                                      .last,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Colors.white)),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                }
-                              },
-                            )),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(3.0),
-                      decoration: BoxDecoration(color: Colors.orangeAccent),
-                      child: Center(
-                        child: Text(
-                          "With Arduino Board",
-                          style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ),
-                  StreamBuilder<List<sensorConnectionConvertor>>(
-                    stream: readsensorConnection(widget.id),
-                    builder: (context, snapshot) {
-                      final Subjects = snapshot.data;
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator(
-                            strokeWidth: 0.3,
-                            color: Colors.cyan,
-                          ));
-                        default:
-                          if (snapshot.hasError) {
-                            return const Text("Error with server");
-                          } else {
-                            return ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: Subjects!.length,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                final SubjectsData = Subjects[index];
-                                List<String> newList = [];
-                                newList = SubjectsData.subData.split(";");
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (SubjectsData.subData.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: StyledTextWidget(
-                                          text: SubjectsData.data,
-                                          fontSize: 18,
-                                          color: Colors.white.withOpacity(0.9),
-                                        ),
-                                      )
-                                    else
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10, top: 20),
-                                        child: StyledTextWidget(
-                                          text: SubjectsData.data,
-                                          fontSize: 20,
-                                          color: Colors.white.withOpacity(0.95),
-                                        ),
-                                      ),
-                                    if (SubjectsData.images.isNotEmpty)
-                                      scrollingImages(
-                                          images:
-                                              SubjectsData.images.split(";"), typeOfProject: 'sensors', id: widget.id,),
-                                    if (SubjectsData.subData.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10, top: 5),
-                                        child: ListView.builder(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          shrinkWrap: true,
-                                          itemCount: newList.length,
-                                          itemBuilder: (BuildContext context,
-                                                  int index) =>
-                                              Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8, right: 5),
-                                                  child: Icon(
-                                                    Icons.circle,
-                                                    size: 8,
-                                                    color: Colors.orangeAccent,
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: StyledTextWidget(
-                                                    text: newList[index],
-                                                    fontSize: 16,
-                                                    color: Colors.white60,
-                                                  ),
-                                                ),
-                                              ],
+                                    TableRow(
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey
+                                              .withOpacity(0.3)),
+                                      children: [
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            'Module',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    if (SubjectsData.table.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 50, vertical: 10),
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount: SubjectsData.table
-                                                  .split(";")
-                                                  .length +
-                                              1, // Number of rows including the header
-                                          itemBuilder: (context, index) {
-                                            if (index == 0) {
-                                              return Table(
-                                                border: TableBorder.all(
-                                                    width: 0.8,
-                                                    color: Colors.white70,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topRight: Radius
-                                                                .circular(10),
-                                                            topLeft:
-                                                                Radius.circular(
-                                                                    10))),
-                                                defaultVerticalAlignment:
-                                                    TableCellVerticalAlignment
-                                                        .middle,
-                                                columnWidths: {
-                                                  0: FractionColumnWidth(0.5),
-                                                  1: FractionColumnWidth(0.5),
-                                                },
-                                                children: [
-                                                  TableRow(
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.grey
-                                                            .withOpacity(0.3)),
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text(
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          'Module',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color:
-                                                                Colors.orange,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text(
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          'Arduino Board',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color:
-                                                                Colors.orange,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              );
-                                            } else {
-                                              String subTechnicalParameters =
-                                                  SubjectsData.table
-                                                      .split(";")[index - 1];
-                                              return Table(
-                                                border: TableBorder.all(
-                                                    width: 0.5,
-                                                    color: Colors.white54,
-                                                    borderRadius: index ==
-                                                            SubjectsData.table
-                                                                .split(";")
-                                                                .length
-                                                        ? BorderRadius.only(
-                                                            bottomLeft:
-                                                                Radius.circular(
-                                                                    10),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                    10))
-                                                        : BorderRadius.circular(
-                                                            0)),
-                                                defaultVerticalAlignment:
-                                                    TableCellVerticalAlignment
-                                                        .middle,
-                                                columnWidths: {
-                                                  0: FractionColumnWidth(0.5),
-                                                  1: FractionColumnWidth(0.5),
-                                                },
-                                                children: [
-                                                  TableRow(
-                                                    children: [
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Text(
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            subTechnicalParameters
-                                                                .split(":")
-                                                                .first,
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Text(
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              subTechnicalParameters
-                                                                  .split(":")
-                                                                  .last,
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white)),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              );
-                                            }
-                                          },
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            'Uno',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          } else {
+                            String subTechnicalParameters = widget
+                                .pinConnection
+                                .split(";")[index - 1];
+                            return Table(
+                              border: TableBorder.all(
+                                  width: 0.5,
+                                  color: Colors.white54,
+                                  borderRadius: index ==
+                                      widget.pinConnection
+                                          .split(";")
+                                          .length
+                                      ? BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight:
+                                      Radius.circular(10))
+                                      : BorderRadius.circular(0)),
+                              defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                              columnWidths: {
+                                0: FractionColumnWidth(0.5),
+                                1: FractionColumnWidth(0.5),
+                              },
+                              children: [
+                                TableRow(
+                                  children: [
+                                    TableCell(
+                                      child: Padding(
+                                        padding:
+                                        const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          subTechnicalParameters
+                                              .split(":")
+                                              .first,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: Colors.white),
                                         ),
                                       ),
-                                    if (SubjectsData.file.isNotEmpty)
-                                      Column(
-                                        children: [
-                                          // showCode(
-                                          //   label: ".ino",
-                                          //   filePath:
-                                          //       'downloadedFiles/${SubjectsData.file}',
-                                          // ),
-                                          Container(
-                                            width: 190,
-                                            decoration: BoxDecoration(
-                                                color: Colors.black54,
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    "Download",
-                                                    style: TextStyle(
-                                                        color: Colors.red,
-                                                        fontSize: 30),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Icon(Icons
-                                                      .download_for_offline_outlined)
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      )
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding:
+                                        const EdgeInsets.all(8.0),
+                                        child: Text(
+                                            subTechnicalParameters
+                                                .split(":")
+                                                .last,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white)),
+                                      ),
+                                    ),
                                   ],
-                                );
-                              },
-                              // separatorBuilder: (context, index) =>const Divider(),
+                                ),
+                              ],
                             );
                           }
-                      }
-                    },
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  )
+                        },
+                      )),
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                padding: const EdgeInsets.all(3.0),
+                decoration: BoxDecoration(color: Colors.orangeAccent),
+                child: Center(
+                  child: Text(
+                    "With Arduino Board",
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+            Description(c0: "sensors", d0: widget.id, c1: "", d1: "", typeOfProject: "sensors"),
+            SizedBox(
+              height: 150,
+            )
           ],
-        ),
-      ),
-    );
+        ),));
   }
 }
 

@@ -31,10 +31,10 @@ dependencies:
   webview_flutter: ^4.2.0
   intl: ^0.18.1
   flutter_staggered_animations: ^1.1.1
-  flutter_local_notifications: ^14.1.0
+  flutter_local_notifications: ^15.1.1
   firebase_messaging: ^14.6.1
   marquee: ^2.2.3
-  visibility_detector: ^0.2.0
+  visibility_detector: ^0.4.0+2
   mailer: ^6.0.1
 
 dev_dependencies:
