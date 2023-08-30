@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "512397462005",
+    "project_id": "prokoni",
+    "storage_bucket": "prokoni.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:512397462005:android:74efdd4aa308ce27af78bc",
+        "android_client_info": {
+          "package_name": "com.example.nsideas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "512397462005-1pg6br0re5rh1mbc3efrm6jnoe21orb5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVb-_KOjpg7bc9CTsizb9eSJgIUrG3imY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "512397462005-1pg6br0re5rh1mbc3efrm6jnoe21orb5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "512397462005-rd4uomj2qkc5ufcup5alj9f9rpggr070.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nsideas.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
