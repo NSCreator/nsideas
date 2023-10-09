@@ -1,37 +1,316 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable, use_build_context_synchronously
 
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:ns_ideas/authPage.dart';
 import 'package:photo_view/photo_view.dart';
+import 'homepage.dart';
 import 'settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-
-import 'arduino.dart';
-import 'electronicProjects.dart';
 import 'functions.dart';
-import 'imageZoom.dart';
 import 'sensors.dart';
 import 'textField.dart';
-import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+class commentsPage extends StatefulWidget {
+final int comments;
+  final String c0;
+  final String d0;
+  final String c1;
+  final String d1;
+  const commentsPage({required this.c0,required this.d0,required this.c1,required this.d1,required this.comments});
+
+
+  @override
+  State<commentsPage> createState() => _commentsPageState();
+}
+
+class _commentsPageState extends State<commentsPage> {
+   TextEditingController comment = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    double Size = size(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding:  EdgeInsets.symmetric(vertical:Size* 8,horizontal:Size* 20),
+          child: Row(
+            children: [
+              Flexible(
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white30,
+                      borderRadius: BorderRadius.circular(Size*20)),
+                  child: Padding(
+                    padding:  EdgeInsets.only(left: Size*10),
+                    child: TextFormField(
+                      controller: comment,
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.multiline,
+                      style:
+                      TextStyle(color: Colors.white, fontSize:Size* 20),
+                      maxLines: null,
+                      // Allows the field to expand as needed
+                      decoration: const InputDecoration(
+                        hintStyle: TextStyle(
+                          color: Colors.white60,
+                        ),
+                        border: InputBorder.none,
+                        hintText: 'Add a comment...',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                child: Padding(
+                  padding:  EdgeInsets.all(Size*5.0),
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ),
+                onTap: () async {
+                  String id = getID();
+
+                 await FirebaseFirestore.instance
+                      .collection("user")
+                      .doc(fullUserId())
+                      .get()
+                      .then((DocumentSnapshot snapshot) async {
+                    if (snapshot.exists) {
+                      var data = snapshot.data();
+                      if (data != null &&
+                          data is Map<String, dynamic>) {
+
+
+                        String name = data['name'].toString().split(";").first[0]??"";
+                         name =name+ data['name'].toString().split(";").last[0]??"";
+                         name="$name:"+fullUserId();
+                         name ="$name;${comment.text.trim()}";
+                         showToastText(comment.text);
+                        widget.c1.isNotEmpty && widget.d1.isNotEmpty
+                            ? await FirebaseFirestore.instance
+                            .collection(widget.c0)
+                            .doc(widget.d0)
+                            .collection(widget.c1)
+                            .doc(widget.d1)
+                            .collection("comments")
+                            .doc(id)
+                            .set({
+                          "id": id,
+                          "data": name,
+                          "reply":[],
+                          "likedBy":[]
+                        })
+                            :await FirebaseFirestore.instance
+                            .collection(widget.c0)
+                            .doc(widget.d0)
+                            .collection("comments")
+                            .doc(id)
+                            .set({
+                          "id": id,
+                          "data": name,
+                          "reply":[],
+                          "likedBy":[]
+                        });
+
+                        widget.c1.isNotEmpty && widget.d1.isNotEmpty
+                            ? await FirebaseFirestore.instance
+                            .collection(widget.c0)
+                            .doc(widget.d0)
+                            .collection(widget.c1)
+                            .doc(widget.d1)
+
+                            .update({
+                          "comments": widget.comments+1,
+
+                        })
+                            :await FirebaseFirestore.instance
+                            .collection(widget.c0)
+                            .doc(widget.d0)
+
+                            .update({
+                          "comments": widget.comments+1,
+
+                        });
+
+                      }
+                    } else {
+                      print("Document does not exist.");
+                    }
+                  }).catchError((error) {
+                    print(
+                        "An error occurred while retrieving data: $error");
+                  });
+
+                    comment.clear();
+                  }
+
+
+              )
+            ],
+          ),
+        ),
+        StreamBuilder<List<CommentsConvertor>>(
+          stream: readComments(widget.c0,widget.d0,widget.c1,widget.d1),
+          builder: (context, snapshot) {
+            final Subjects = snapshot.data;
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 0.3,
+                      color: Colors.cyan,
+                    ));
+              default:
+                if (snapshot.hasError) {
+                  return const Text("Error with server");
+                } else {
+                  return ListView.separated(
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: Subjects!.length,
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      final SubjectsData = Subjects[index];
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+
+                          Padding(
+                            padding:  EdgeInsets.all(Size*8.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(color: Colors.white12,
+                                  borderRadius: BorderRadius.circular(Size*20)),
+                                  child: Padding(
+                                    padding:  EdgeInsets.all(Size*5),
+                                    child: Text(SubjectsData.data.split(":").first.toUpperCase(),style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.bold),),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.only(left: Size*5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                          Text("@${SubjectsData.data.split(";").first.split(":").last}",style: TextStyle(color: Colors.white54,fontSize:Size* 15)),
+                                          StyledTextWidget(
+                                              text: SubjectsData.data.split(";").last,
+                                              fontSize: Size*22,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
+                                          if(SubjectsData.reply.isNotEmpty)ListView.builder(
+                                              physics:
+                                              const NeverScrollableScrollPhysics(),
+                                              shrinkWrap: true,
+                                              itemCount: SubjectsData.reply.length,
+                                              itemBuilder: (BuildContext context,
+                                                  int index) {
+                                                return StyledTextWidget(
+                                                    text: SubjectsData.reply[
+                                                    index],
+                                                    color: Colors
+                                                        .white70,
+                                                    fontSize:
+                                                    Size*18);
+                                              }),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if(fullUserId()==SubjectsData.data.split(";").first.split(":").last||fullUserId()=="sujithnimmala03@gmail.com")InkWell(
+                                    child: Padding(
+                                      padding:  EdgeInsets.all(Size*5.0),
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.amberAccent,
+                                      ),
+                                    ),
+                                    onTap: () async {
+                                      widget.c1.isNotEmpty && widget.d1.isNotEmpty
+                                          ? await FirebaseFirestore.instance
+                                          .collection(widget.c0)
+                                          .doc(widget.d0)
+                                          .collection(widget.c1)
+                                          .doc(widget.d1)
+
+                                          .update({
+                                        "comments": Subjects.length-1,
+
+                                      })
+                                          :await FirebaseFirestore.instance
+                                          .collection(widget.c0)
+                                          .doc(widget.d0)
+
+                                          .update({
+                                        "comments": Subjects.length-1,
+
+                                      });
+                                      widget.c1.isNotEmpty && widget.d1.isNotEmpty
+                                          ? FirebaseFirestore.instance
+                                          .collection(widget.c0)
+                                          .doc(widget.d0)
+                                          .collection(widget.c1)
+                                          .doc(widget.d1)
+                                          .collection("comments")
+                                          .doc(SubjectsData.id).delete()
+                                          : FirebaseFirestore.instance
+                                          .collection(widget.c0)
+                                          .doc(widget.d0)
+                                          .collection("comments")
+                                          .doc(SubjectsData.id).delete();
+
+
+                                    }
+
+
+
+                                )
+                              ],
+                            ),
+                          ),
+
+
+                        ],
+                      );
+                    },
+                    separatorBuilder: (context, index) =>
+                        SizedBox(
+                          height: Size*15,
+                        ),
+                  );
+                }
+            }
+          },
+        ),
+        SizedBox(height: Size*150),
+      ],
+    );
+  }
+}
 
 
 class ImageDownloadScreen extends StatefulWidget {
   List<String> images;
   String id;
-  String typeOfProject;
+
 
   ImageDownloadScreen(
-      {Key? key,required this.images,required this.id,required this.typeOfProject})
+      {Key? key,required this.images,required this.id})
       : super(key: key);
   @override
   _ImageDownloadScreenState createState() => _ImageDownloadScreenState();
@@ -57,7 +336,7 @@ class _ImageDownloadScreenState extends State<ImageDownloadScreen> {
 
     // Create a directory to save the downloaded images
     final Directory appDir = await getApplicationDocumentsDirectory();
-    final String imagesDirPath = '${appDir.path}/${widget.typeOfProject}/${widget.id}';
+    final String imagesDirPath = '${appDir.path}/${widget.id}';
     await Directory(imagesDirPath).create(recursive: true);
 
     for (String url in widget.images) {
@@ -89,12 +368,13 @@ class _ImageDownloadScreenState extends State<ImageDownloadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double Size = size(context);
     return AlertDialog(
       backgroundColor: Colors.transparent,
       content: Container(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(Size*10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(Size*15),
           border: Border.all(color: Colors.white30),
         ),
         child: Column(
@@ -102,9 +382,9 @@ class _ImageDownloadScreenState extends State<ImageDownloadScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Just A Movement',style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.w600),),
-            SizedBox(height: 8,),
-            Text('...loading image $downloadedImages of $totalImages',style: TextStyle(color: Colors.white,fontSize: 18),),
+            Text('Just A Movement',style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.w600),),
+            SizedBox(height:Size* 8,),
+            Text('...loading image $downloadedImages of $totalImages',style: TextStyle(color: Colors.white,fontSize: Size*18),),
             LinearProgressIndicator(
               // value: overallProgress,
             ),
@@ -115,6 +395,93 @@ class _ImageDownloadScreenState extends State<ImageDownloadScreen> {
   }
 }
 
+class ImageDownloadsScreen extends StatefulWidget {
+  List<String> images;
+  ImageDownloadsScreen(
+      {Key? key,required this.images})
+      : super(key: key);
+  @override
+  _ImageDownloadsScreenState createState() => _ImageDownloadsScreenState();
+}
+
+class _ImageDownloadsScreenState extends State<ImageDownloadsScreen> {
+
+
+  int totalImages = 0;
+  int downloadedImages = 0;
+  double overallProgress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _downloadImages();
+  }
+
+  _downloadImages() async {
+    totalImages = widget.images.length;
+    downloadedImages = 0;
+    overallProgress = 0.0;
+
+
+
+    for (String url in widget.images) {
+      final Uri uri = Uri.parse(url.split(";").first);
+      final String fileName = uri.pathSegments.last;
+      var name = fileName.split("/").last;
+      if (url.startsWith('https://drive.google.com')) {
+        name = url.split(";").first.split('/d/')[1].split('/')[0];
+
+        url = "https://drive.google.com/uc?export=download&id=$name";
+      }
+      final response = await http.get(Uri.parse(url.split(";").first));
+      final documentDirectory = await getApplicationDocumentsDirectory();
+      final newDirectory =
+      Directory('${documentDirectory.path}/${url.split(";").last}');
+      if (!await newDirectory.exists()) {
+        await newDirectory.create(recursive: true);
+      }
+      final file = File('${newDirectory.path}/${name.split(";").first}');
+      await file.writeAsBytes(response.bodyBytes);
+
+      setState(() {
+        downloadedImages++;
+        overallProgress = downloadedImages / totalImages;
+      });
+
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double Size = size(context);
+    return AlertDialog(
+      backgroundColor: Colors.transparent,
+      content: Container(
+        padding: EdgeInsets.all(Size*10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Size*15),
+          border: Border.all(color: Colors.white30),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('Just A Movement',style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.w600),),
+            SizedBox(height:Size* 8,),
+            Text('...loading image $downloadedImages of $totalImages',style: TextStyle(color: Colors.white,fontSize: Size*18),),
+            LinearProgressIndicator(
+              // value: overallProgress,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 class Description extends StatefulWidget {
@@ -133,7 +500,7 @@ class Description extends StatefulWidget {
 class _DescriptionState extends State<Description> {
   @override
   Widget build(BuildContext context) {
-
+double Size = size(context);
     return StreamBuilder<List<DescriptionConvertor>>(
       stream: readAllDescription(widget.c0,widget.d0,widget.c1,widget.d1),
       builder: (context, snapshot) {
@@ -150,57 +517,36 @@ class _DescriptionState extends State<Description> {
               return const Text("Error with server");
             } else {
               return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: const Padding(
-                          padding: EdgeInsets.only(
-                              left: 8,
-                              right: 8,
-                              top: 10,
-                              bottom: 3),
-                          child: Text(
-                            "In Detail",
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        child:  Container(
-                          decoration: BoxDecoration(
-                            color: Colors.greenAccent,
-                            borderRadius:
-                            BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Text(" ADD "),
-                          ),
-                        ),
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(c0: widget.c0,d0:widget.d0,c1:widget.c1,d1:widget.d1)));
-                        },
-                      )
-                    ],
+                  if(isUser()) Padding(
+                    padding:  EdgeInsets.symmetric(horizontal: Size*20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+                         Text("Description",style: TextStyle(color: Colors.white70,fontSize: Size*20,fontWeight: FontWeight.w600),),
+                         InkWell(
+                           child:  Container(
+                             decoration: BoxDecoration(
+                               color: Colors.greenAccent,
+                               borderRadius:
+                               BorderRadius.circular(Size*15),
+                             ),
+                             child: Padding(
+                               padding:  EdgeInsets.all(Size*5.0),
+                               child: Text(" ADD "),
+                             ),
+                           ),
+                           onTap: (){
+                             Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(c0: widget.c0,d0:widget.d0,c1:widget.c1,d1:widget.d1)));
+                           },
+                         ),
+                       ],
+                     ),
                   ),
-                  Center(
-                    child: Container(
-                      height: 2,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
+
                   ListView.separated(
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: Subjects!.length,
@@ -214,21 +560,21 @@ class _DescriptionState extends State<Description> {
                         crossAxisAlignment:
                         CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          if(isUser())Row(
                             children: [
                               Text("Id : ${SubjectsData.id}",style: TextStyle(color: Colors.white),),
                               Spacer(),
                               InkWell(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding:  EdgeInsets.symmetric(horizontal: Size*10),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: Colors.lightBlueAccent,
                                       borderRadius:
-                                      BorderRadius.circular(15),
+                                      BorderRadius.circular(Size*15),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
+                                      padding:  EdgeInsets.all(Size*5.0),
                                       child: Text(" Edit "),
                                     ),
                                   ),
@@ -242,10 +588,10 @@ class _DescriptionState extends State<Description> {
                                   decoration: BoxDecoration(
                                     color: Colors.redAccent,
                                     borderRadius:
-                                    BorderRadius.circular(15),
+                                    BorderRadius.circular(Size*15),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(5.0),
+                                    padding:  EdgeInsets.all(Size*5.0),
                                     child: Text(" Delete "),
                                   ),
                                 ),
@@ -256,35 +602,37 @@ class _DescriptionState extends State<Description> {
                             ],
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding:  EdgeInsets.all(Size*8.0),
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (newList.length > 1)
                                   StyledTextWidget(
                                       text: SubjectsData.data,
-                                      fontSize: 22,
+                                      fontSize: Size*22,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600)
                                 else if (SubjectsData.images.isNotEmpty)
                                   StyledTextWidget(
                                       text: SubjectsData.data,
-                                      fontSize: 22,
+                                      fontSize: Size*22,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w500)
                                 else
                                   StyledTextWidget(
                                       text: "       ${SubjectsData.data}",
-                                      fontSize: 20,
+                                      fontSize: Size*20,
                                       color:
                                       Colors.white.withOpacity(0.9),
                                       fontWeight: FontWeight.w400),
                                 if (SubjectsData.images.isNotEmpty)
                                   Padding(
                                     padding:
-                                    const EdgeInsets.only(top: 20),
+                                     EdgeInsets.only(top:Size* 20),
                                     child: scrollingImages(
                                       images: SubjectsData.images
-                                          .split(";"), typeOfProject: widget.typeOfProject, id: widget.d1,),
+                                          .split(";"),  id: widget.d1,),
                                   ),
                                 if (SubjectsData.subData.isNotEmpty)
                                   ListView.builder(
@@ -297,7 +645,7 @@ class _DescriptionState extends State<Description> {
                                         if (newList.length > 1) {
                                           return Padding(
                                             padding:
-                                            const EdgeInsets.all(8.0),
+                                             EdgeInsets.all(Size*8.0),
                                             child: Row(
                                               mainAxisAlignment:
                                               MainAxisAlignment.start,
@@ -307,9 +655,9 @@ class _DescriptionState extends State<Description> {
                                               children: [
                                                 Text(
                                                   "${index + 1}. ",
-                                                  style: const TextStyle(
+                                                  style:  TextStyle(
                                                       color: Colors.white,
-                                                      fontSize: 20),
+                                                      fontSize: Size*20),
                                                 ),
                                                 Expanded(
                                                     child:
@@ -319,7 +667,7 @@ class _DescriptionState extends State<Description> {
                                                         color: Colors
                                                             .white70,
                                                         fontSize:
-                                                        18)),
+                                                        Size*18)),
                                               ],
                                             ),
                                           );
@@ -327,13 +675,13 @@ class _DescriptionState extends State<Description> {
                                           return Center(
                                             child: Padding(
                                                 padding:
-                                                const EdgeInsets.all(
-                                                    8.0),
+                                                 EdgeInsets.all(
+                                                    Size*8.0),
                                                 child: StyledTextWidget(
                                                     text: newList[index],
                                                     color: Colors
                                                         .amberAccent,
-                                                    fontSize: 16)),
+                                                    fontSize: Size*16)),
                                           );
                                         }
                                       }),
@@ -342,8 +690,8 @@ class _DescriptionState extends State<Description> {
                           ),
                           if (SubjectsData.table.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 10),
+                              padding:  EdgeInsets.symmetric(
+                                  horizontal:Size* 8, vertical:Size* 10),
                               child: ListView.builder(
                                 shrinkWrap: true,
                                 physics:
@@ -356,15 +704,15 @@ class _DescriptionState extends State<Description> {
                                   if (index == 0) {
                                     return Table(
                                       border: TableBorder.all(
-                                          width: 0.8,
+                                          width:Size* 0.8,
                                           color: Colors.white70,
                                           borderRadius:
                                           BorderRadius.only(
                                               topRight: Radius
-                                                  .circular(10),
+                                                  .circular(Size*10),
                                               topLeft: Radius
                                                   .circular(
-                                                  10))),
+                                                  Size* 10))),
                                       defaultVerticalAlignment:
                                       TableCellVerticalAlignment
                                           .middle,
@@ -381,22 +729,22 @@ class _DescriptionState extends State<Description> {
                                               borderRadius:
                                               BorderRadius.only(
                                                   topRight: Radius
-                                                      .circular(10),
+                                                      .circular(Size*10),
                                                   topLeft: Radius
                                                       .circular(
-                                                      10))
+                                                      Size*10))
                                           ),
                                           children: [
                                             Padding(
                                               padding:
-                                              const EdgeInsets
-                                                  .all(8.0),
+                                               EdgeInsets
+                                                  .all(Size*8.0),
                                               child: Text(
                                                 textAlign: TextAlign
                                                     .center,
                                                 'Module',
                                                 style: TextStyle(
-                                                  fontSize: 15,
+                                                  fontSize: Size*15,
                                                   color:
                                                   Colors.orange,
                                                   fontWeight:
@@ -407,14 +755,14 @@ class _DescriptionState extends State<Description> {
                                             ),
                                             Padding(
                                               padding:
-                                              const EdgeInsets
-                                                  .all(8.0),
+                                               EdgeInsets
+                                                  .all(Size*8.0),
                                               child: Text(
                                                 textAlign: TextAlign
                                                     .center,
                                                 'Arduino Board',
                                                 style: TextStyle(
-                                                  fontSize: 15,
+                                                  fontSize:Size* 15,
                                                   color:
                                                   Colors.orange,
                                                   fontWeight:
@@ -433,7 +781,7 @@ class _DescriptionState extends State<Description> {
                                         .split(";")[index - 1];
                                     return Table(
                                       border: TableBorder.all(
-                                          width: 0.5,
+                                          width: Size*0.5,
                                           color: Colors.white54,
                                           borderRadius: index ==
                                               SubjectsData.table
@@ -441,11 +789,11 @@ class _DescriptionState extends State<Description> {
                                                   .length
                                               ? BorderRadius.only(
                                               bottomLeft: Radius
-                                                  .circular(10),
+                                                  .circular(Size*10),
                                               bottomRight:
                                               Radius
                                                   .circular(
-                                                  10))
+                                                  Size*10))
                                               : BorderRadius
                                               .circular(0)),
                                       defaultVerticalAlignment:
@@ -461,8 +809,8 @@ class _DescriptionState extends State<Description> {
                                             TableCell(
                                               child: Padding(
                                                 padding:
-                                                const EdgeInsets
-                                                    .all(8.0),
+                                                 EdgeInsets
+                                                    .all(Size*8.0),
                                                 child: Text(
                                                   textAlign:
                                                   TextAlign
@@ -479,8 +827,8 @@ class _DescriptionState extends State<Description> {
                                             TableCell(
                                               child: Padding(
                                                 padding:
-                                                const EdgeInsets
-                                                    .all(8.0),
+                                                 EdgeInsets
+                                                    .all(Size*8.0),
                                                 child: Text(
                                                     textAlign:
                                                     TextAlign
@@ -503,13 +851,13 @@ class _DescriptionState extends State<Description> {
                             ),
                           if(SubjectsData.files.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.all(5.0),
+                              padding:  EdgeInsets.all(Size*5.0),
                               child: Container(
                                 width:double.infinity,
                                 decoration: BoxDecoration(
                                   color: Colors.black38,
                                   border: Border.all(color: Colors.white24),
-                                  borderRadius: BorderRadius.circular(10)
+                                  borderRadius: BorderRadius.circular(Size*10)
                                 ),
                                   child: Column(
                                     children: [
@@ -520,13 +868,13 @@ class _DescriptionState extends State<Description> {
                                             borderRadius:
                                             BorderRadius.only(
                                                 topRight: Radius
-                                                    .circular(10),
+                                                    .circular(Size*10),
                                                 topLeft: Radius
                                                     .circular(
-                                                    10))
+                                                    Size*10))
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
+                                          padding:  EdgeInsets.all(Size*5.0),
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
@@ -537,13 +885,13 @@ class _DescriptionState extends State<Description> {
                                       ),
 
                                       Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding:  EdgeInsets.all(Size*8.0),
                                         child: SingleChildScrollView(
                                           physics: BouncingScrollPhysics(),
                                           scrollDirection: Axis.horizontal,
                                           child: SelectableText(
                                             SubjectsData.files,
-                                            style: TextStyle(fontSize: 15,color: Colors.white.withOpacity(0.9)),
+                                            style: TextStyle(fontSize: Size*15,color: Colors.white.withOpacity(0.9)),
                                           ),
                                         ),
                                       ),
@@ -555,8 +903,8 @@ class _DescriptionState extends State<Description> {
                       );
                     },
                     separatorBuilder: (context, index) =>
-                    const SizedBox(
-                      height: 15,
+                     SizedBox(
+                      height: Size*15,
                     ),
                   ),
                 ],
@@ -567,6 +915,7 @@ class _DescriptionState extends State<Description> {
     );
   }
 }
+
 Stream<List<DescriptionConvertor>> readAllDescription(String c0,String d0,String c1,String d1) =>
     c1.isNotEmpty && d1.isNotEmpty?FirebaseFirestore.instance
         .collection(c0)
@@ -592,6 +941,7 @@ String getID() {
   var now = new DateTime.now();
   return DateFormat('d.M.y-kk:mm:ss').format(now);
 }
+
 class webView extends StatefulWidget {
   const webView({required this.url});
 
@@ -643,18 +993,19 @@ class _tableOfContentState extends State<tableOfContent> {
 
   @override
   Widget build(BuildContext context) {
+    double Size = size(context);
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding:  EdgeInsets.all(Size*10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text(
+               Text(
                 "Table of Content : ",
                 style: TextStyle(
-                    fontSize: 25,
+                    fontSize: Size*25,
                     fontWeight: FontWeight.w400,
                     color: Colors.white),
               ),
@@ -664,7 +1015,7 @@ class _tableOfContentState extends State<tableOfContent> {
                   isView ? "Hide" : "View",
                   style: TextStyle(
                       color: Color.fromRGBO(17, 245, 237, 1),
-                      fontSize: 16),
+                      fontSize: Size*16),
                 ),
                 onTap: () {
                   setState(() {
@@ -673,14 +1024,14 @@ class _tableOfContentState extends State<tableOfContent> {
                 },
               ),
               SizedBox(
-                width: 10,
+                width: Size*10,
               )
             ],
           ),
           if (isView)
             Padding(
               padding:
-              const EdgeInsets.only(left: 20, right: 10, top: 10),
+               EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
               child: ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: widget.list.length,
@@ -693,22 +1044,251 @@ class _tableOfContentState extends State<tableOfContent> {
                         children: [
                            Icon(
                             Icons.circle,
-                            size: 5,
+                            size: Size*5,
                             color: Colors.white70,
                           ),
                         ],
                       ),
-                      const SizedBox(
-                        width: 10,
+                       SizedBox(
+                        width: Size*10,
                       ),
                       Text(
                         name,
-                        style: const TextStyle(
-                            fontSize: 18,
+                        style:  TextStyle(
+                            fontSize: Size*18,
                             color: Colors.white70,
                             fontWeight: FontWeight.w400),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class componentsAndSupplies
+    extends StatefulWidget {
+  final List list;
+  final bool isView;
+  const componentsAndSupplies
+      ({Key? key, required this.list, this.isView = false})
+      : super(key: key);
+
+  @override
+  State<componentsAndSupplies> createState() => _componentsAndSuppliesState();
+}
+
+class _componentsAndSuppliesState extends State<componentsAndSupplies> {
+  bool isView = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      isView = widget.isView;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double Size = size(context);
+    return Padding(
+      padding:  EdgeInsets.all(Size*10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Components And Supplies",
+                style: TextStyle(
+                    fontSize: Size*25,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white),
+              ),
+              Spacer(),
+              InkWell(
+                child: Text(
+                  isView ? "Hide" : "View",
+                  style: TextStyle(
+                      color: Color.fromRGBO(17, 245, 237, 1),
+                      fontSize: Size*16),
+                ),
+                onTap: () {
+                  setState(() {
+                    isView = !isView;
+                  });
+                },
+              ),
+              SizedBox(
+                width: Size*10,
+              )
+            ],
+          ),
+          if (isView)
+            Padding(
+              padding:
+              EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
+              child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.list.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  String name = widget.list[index];
+                  return Row(
+                    children: [
+                      Column(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: Size*5,
+                            color: Colors.white70,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: Size*5,
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          child: Text(
+                            name.split(";").first,
+                            style:  TextStyle(
+                                fontSize: Size*18,
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w400),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>zoom(url: name.split(";")[1], typeOfProject: "componentsAndSupplies")));
+
+                          },
+                        ),
+                      ),
+                      InkWell(
+                        child: Icon(Icons.open_in_new,color: Colors.lightGreenAccent,),
+                        onTap: (){
+                          ExternalLaunchUrl(name.split(";").last.trim());
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+class appsAndPlatforms
+    extends StatefulWidget {
+  final List list;
+  final bool isView;
+  const appsAndPlatforms
+      ({Key? key, required this.list, this.isView = false})
+      : super(key: key);
+
+  @override
+  State<appsAndPlatforms> createState() => _appsAndPlatformsState();
+}
+
+class _appsAndPlatformsState extends State<appsAndPlatforms> {
+  bool isView = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      isView = widget.isView;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double Size = size(context);
+    return Padding(
+      padding:  EdgeInsets.all(Size*10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Apps and platforms",
+                style: TextStyle(
+                    fontSize: Size*25,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white),
+              ),
+              Spacer(),
+              InkWell(
+                child: Text(
+                  isView ? "Hide" : "View",
+                  style: TextStyle(
+                      color: Color.fromRGBO(17, 245, 237, 1),
+                      fontSize: Size*16),
+                ),
+                onTap: () {
+                  setState(() {
+                    isView = !isView;
+                  });
+                },
+              ),
+              SizedBox(
+                width: Size*10,
+              )
+            ],
+          ),
+          if (isView)
+            Padding(
+              padding:
+              EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
+              child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.list.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  String name = widget.list[index];
+                  return Row(
+                    children: [
+                      Column(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: Size*5,
+                            color: Colors.white70,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: Size*5,
+                      ),
+                      Expanded(
+                        child: Text(
+                          name.split(";").first,
+                          style:  TextStyle(
+                              fontSize: Size*18,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w400),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      InkWell(
+                        child: Icon(Icons.open_in_new,color: Colors.lightGreenAccent,),
+                        onTap: (){
+                          ExternalLaunchUrl(name.split(";").last.trim());
+                        },
                       ),
                     ],
                   );
@@ -734,18 +1314,19 @@ class Required extends StatefulWidget {
 class _RequiredState extends State<Required> {
   @override
   Widget build(BuildContext context) {
+    double Size = size(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 5),
+          padding:  EdgeInsets.only(left: Size*8, bottom: Size*5),
           child: Row(
             children: [
                Text(
                 widget.heading,
                 style: TextStyle(
-                    fontSize: 23,
+                    fontSize: Size*23,
                     fontWeight: FontWeight.w500,
                     color: Colors.white),
               ),
@@ -753,7 +1334,7 @@ class _RequiredState extends State<Required> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 20, right: 10),
+          padding: EdgeInsets.only(left:Size* 20, right: Size*10),
           child: ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: widget.list.length,
@@ -765,23 +1346,23 @@ class _RequiredState extends State<Required> {
 
               return InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding:  EdgeInsets.all(Size*4.0),
                   child: Row(
                     children: [
-                      const Icon(
+                       Icon(
                         Icons.circle,
-                        size: 8,
+                        size: Size*8,
                         color: Colors.white,
                       ),
-                      const SizedBox(
-                        width: 5,
+                       SizedBox(
+                        width: Size*5,
                       ),
                       Expanded(
                           child: Text(
                             name,
-                            style: const TextStyle(
+                            style:  TextStyle(
                                 color: Colors.white,
-                                fontSize: 20,
+                                fontSize:Size* 20,
                                 fontWeight: FontWeight.w300),
                           )),
                     ],
@@ -796,7 +1377,7 @@ class _RequiredState extends State<Required> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                zoom(url: photoUrl, typeOfProject: '', id: '',)));
+                                zoom(url: photoUrl, typeOfProject: '',)));
                   } else {
                     showToastText(noImageUrl);
                   }
@@ -852,8 +1433,7 @@ class _youtubeState extends State<youtube> {
 class zoom extends StatefulWidget {
   String url;
   String typeOfProject;
-  String id;
-  zoom({Key? key,required this.url,required this.typeOfProject,required this.id}) : super(key: key);
+  zoom({Key? key,required this.url,required this.typeOfProject}) : super(key: key);
 
   @override
   State<zoom> createState() => _zoomState();
@@ -871,7 +1451,7 @@ class _zoomState extends State<zoom> {
    getPath()
    async{
      final Directory appDir = await getApplicationDocumentsDirectory();
-     final String imagesDirPath = '${appDir.path}/${widget.typeOfProject}/${widget.id}';
+     final String imagesDirPath = '${appDir.path}/${widget.typeOfProject}';
      final Uri uri = Uri.parse(widget.url);
      final String filename = uri.pathSegments.last;
      file = File('$imagesDirPath/$filename');
@@ -880,8 +1460,18 @@ class _zoomState extends State<zoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-          child: file.existsSync()?PhotoView(imageProvider: FileImage(file)):PhotoView(imageProvider:NetworkImage(widget.url),
+      backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Column(
+            children: [
+              backButton(size: 1),
+              Expanded(
+                child: Center(
+                  child: file.existsSync()?PhotoView(imageProvider: FileImage(file)):PhotoView(imageProvider:NetworkImage(widget.url),
+                  ),
+                ),
+              ),
+            ],
           ),
         ));
   }
@@ -926,31 +1516,13 @@ class StyledTextWidget extends StatelessWidget {
         ));
       } else if (word.startsWith("'") && word.endsWith("'")) {
         spans.add(TextSpan(
-          text: word.substring(1, word.length - 1) + ' ',
+          text: '${word.substring(1, word.length - 1)} ',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ));
-      } else if (word.contains('@')) {
-        String url = word.substring(word.indexOf('@') + 1);
-        spans.add(
-          WidgetSpan(
-            child: InkWell(
-              onTap: () async {
-                if (await canLaunch(url)) {
-                  await launch(url);
-                }
-              },
-              child: Text(
-                word.split("@").first + ' ',
-                style: TextStyle(
-                    color: Colors.lightBlueAccent, fontSize: fontSize),
-              ),
-            ),
-          ),
-        );
       } else {
-        spans.add(TextSpan(text: word + ' '));
+        spans.add(TextSpan(text: '$word '));
       }
     }
 

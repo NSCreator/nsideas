@@ -25,7 +25,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -45,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBYxgAkrusk6Ogu7QdL9w10gSw9iZAt0YM',
-    appId: '1:512397462005:web:fa32b61ca4cf9144af78bc',
+    appId: '1:512397462005:web:5e6b83b29c7f113baf78bc',
     messagingSenderId: '512397462005',
     projectId: 'prokoni',
     authDomain: 'prokoni.firebaseapp.com',
     storageBucket: 'prokoni.appspot.com',
-    measurementId: 'G-5HH8NVZB0J',
+    measurementId: 'G-EGKM49886V',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBVb-_KOjpg7bc9CTsizb9eSJgIUrG3imY',
-    appId: '1:512397462005:android:74efdd4aa308ce27af78bc',
+    appId: '1:512397462005:android:cbf871945cce71ccaf78bc',
     messagingSenderId: '512397462005',
     projectId: 'prokoni',
     storageBucket: 'prokoni.appspot.com',
@@ -63,21 +66,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDsTSsLsw2kxVdQrmpV08-uBN7btkCF_tg',
-    appId: '1:512397462005:ios:2e870199b30b815faf78bc',
+    appId: '1:512397462005:ios:14d879537cb33a0daf78bc',
     messagingSenderId: '512397462005',
     projectId: 'prokoni',
     storageBucket: 'prokoni.appspot.com',
-    iosClientId: '512397462005-tklrcadqpnkogde79hejmaknq9p3rt8l.apps.googleusercontent.com',
-    iosBundleId: 'com.example.nsideas',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDsTSsLsw2kxVdQrmpV08-uBN7btkCF_tg',
-    appId: '1:512397462005:ios:f01909deaa232d2daf78bc',
-    messagingSenderId: '512397462005',
-    projectId: 'prokoni',
-    storageBucket: 'prokoni.appspot.com',
-    iosClientId: '512397462005-rd4uomj2qkc5ufcup5alj9f9rpggr070.apps.googleusercontent.com',
-    iosBundleId: 'com.example.nsideas.RunnerTests',
+    iosClientId: '512397462005-20r089tqeo6lvcg6n23ck3459imksh35.apps.googleusercontent.com',
+    iosBundleId: 'com.nimmalasujith.nsIdeas',
   );
 }

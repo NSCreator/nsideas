@@ -1,26 +1,17 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'firebase_options.dart';
-import 'searchBar.dart';
-import 'textField.dart';
 import 'authPage.dart';
+import 'functions.dart';
 import 'homepage.dart';
 import 'notification.dart';
-import 'saveCartList.dart';
-// import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-bool isDesktop(BuildContext context) =>
-    MediaQuery.of(context).size.width >= 600;
 
-bool isMobile(BuildContext context) => MediaQuery.of(context).size.width <= 600;
-
-double Width(BuildContext context) => MediaQuery.of(context).size.width;
-
-double Height(BuildContext context) => MediaQuery.of(context).size.height;
 
 Future<void> backgroundHandler(RemoteMessage message) async {
   print(message.data.toString());
@@ -34,9 +25,7 @@ Future main() async {
     );
     FirebaseMessaging.onBackgroundMessage(backgroundHandler);
     NotificationService().initNotification();
-
   runApp(MyApp());
-
 }
 
 class MyApp extends StatefulWidget {
@@ -49,9 +38,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
 
+    super.initState();
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       if (message != null) {
         print(message.notification);
@@ -73,21 +61,27 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
-      title: 'NSIdeas',
-
-      home: Scaffold(
-
-        body: StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return HomePage();
-              } else {
-                return  LoginPage();
-              }
-            }),
+      title: 'NS Ideas',
+      theme: ThemeData(
+        useMaterial3: true,
+        highlightColor: Colors.transparent,
+        splashColor: Colors
+            .transparent,
+        splashFactory: NoSplash.splashFactory,
+        scaffoldBackgroundColor: Color(0xFF060D0E),
       ),
+      home:StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              downloadImagesForAllPage( context);
+              return HomePage();
+            } else {
+              return  LoginPage();
+            }
+          }),
       debugShowCheckedModeBanner: false,
     );
   }

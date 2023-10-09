@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_import, non_constant_identifier_names, prefer_const_constructors, sort_child_properties_last
+// ignore_for_file: unnecessary_import, non_constant_identifier_names, prefer_const_constructors, sort_child_properties_last, must_be_immutable, file_names, use_build_context_synchronously
 
 import 'dart:async';
 import 'dart:math';
@@ -9,15 +9,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:nsideas/raspberrypi.dart';
-import 'package:nsideas/textField.dart';
+import 'raspberrypi.dart';
+import 'textField.dart';
 import 'functions.dart';
 import 'homepage.dart';
 
 import 'notification.dart';
 double size(BuildContext context) {
   MediaQueryData mediaQuery = MediaQuery.of(context);
-  double screenHeight = ((mediaQuery.size.height/800)+(mediaQuery.size.width/400))/2;
+  double screenHeight = ((mediaQuery.size.height/900)+(mediaQuery.size.width/400))/2;
   return screenHeight;
 }
 class LoginPage extends StatefulWidget {
@@ -28,9 +28,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  double Size = 1;
   final formKey = GlobalKey<FormState>();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -44,9 +42,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    setState(() {
-      Size = size(context);
-    });
+
+     double Size = size(context);
+
     return backGroundImage(
         child: SafeArea(
           child: Center(
@@ -135,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
                   SizedBox(
-                    height: 20,
+                    height:Size *  20,
                   ),
                   InkWell(
                     child: Text(
@@ -209,9 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => createNewUser(
-                                    size: size(context),
-                                  )));
+                                  builder: (context) => createNewUser()));
                         },
                       ),
                     ],
@@ -249,8 +245,6 @@ class _LoginPageState extends State<LoginPage> {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailController.text.trim().toLowerCase(),
           password: passwordController.text.trim());
-
-
     } on FirebaseException catch (e) {
       showToastText(e.message as String);
 
@@ -260,9 +254,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class createNewUser extends StatefulWidget {
-  double size;
 
-  createNewUser({required this.size});
 
   @override
   State<createNewUser> createState() => _createNewUserState();
@@ -272,14 +264,12 @@ class _createNewUserState extends State<createNewUser> {
   bool isTrue = false;
   bool isSend = false;
   String otp = "";
-  List branches = ["ECE", "CIVIL", "CSE", "EEE", "IT", "MECH"];
-  String branch = "";
+
   final emailController = TextEditingController();
   final otpController = TextEditingController();
   final passwordController = TextEditingController();
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
-  final gmailController = TextEditingController();
   final passwordController_X = TextEditingController();
 
   String generateCode() {
@@ -296,13 +286,13 @@ class _createNewUserState extends State<createNewUser> {
 
   @override
   Widget build(BuildContext context) {
-    double Size = widget.size;
+    double Size = size(context);
     return backGroundImage(
       child: Column(
         children: [
           backButton(
             size: Size,
-            text: "Enter College Mail ID",
+            text: "Enter Gmail ID",
           ),
           SizedBox(
             height: Size * 15,
@@ -314,7 +304,7 @@ class _createNewUserState extends State<createNewUser> {
                 style: textFieldStyle(Size),
                 decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Enter College Mail ID',
+                    hintText: 'Enter Gmail ID',
                     hintStyle: textFieldHintStyle(Size)),
                 validator: (email) =>
                 email != null && !EmailValidator.validate(email)
@@ -338,20 +328,20 @@ class _createNewUserState extends State<createNewUser> {
                       )),
                 ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding:  EdgeInsets.symmetric(horizontal: Size * 20),
                 child: InkWell(
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.amber,
-                        borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(Size * 10)),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 5, horizontal: 10),
+                      padding:  EdgeInsets.symmetric(
+                          vertical:Size *  5, horizontal:Size *  10),
                       child: Text(
                         isSend ? "Verity" : "Send OTP",
                         style: TextStyle(
                             color: Colors.black,
-                            fontSize: 30,
+                            fontSize: Size * 30,
                             fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -372,65 +362,20 @@ class _createNewUserState extends State<createNewUser> {
                     }
                     else {
                       otp = generateCode();
-                      var email = emailController.text.trim().split('@');
-                      if (email[1] == 'srkrec.ac.in') {
 
-                        FirebaseFirestore.instance
-                            .collection("tempRegisters")
-                            .doc(emailController.text)
-                            .set({"email": emailController.text, "opt": otp});
-                        sendEmail(emailController.text.trim(), otp);
-                        String str = emailController.text.substring(6, 8);
-                        if (str == '04') {
-                          branch = 'ECE';
-                        } else if (str == '01') {
-                          branch = 'CIVIL';
-                        } else if (str == '05') {
-                          branch = 'CSE';
-                        } else if (str == '02') {
-                          branch = 'EEE';
-                        } else if (str == '12') {
-                          branch = 'IT';
-                        } else if (str == '03') {
-                          branch = 'MECH';
-                        } else {
-                          Navigator.pop(context);
-                          showToastText("Your Branch Is Not Registered");
-                          FirebaseFirestore.instance
-                              .collection("tempRegisters")
-                              .doc(emailController.text)
-                              .delete();
-                        }
-                        // pushNotificationsToOwner(
-                        //   emailController.text + "'s Otp : $otp",
-                        // );
-                        otp;
-                      }
-                      else {
-                        if (emailController.text.split('@').last == 'gmail.com') {
-                          showToastText("OTP is Not Sent to Email");
+
+                          showToastText("OTP is Sent to our Email");
                           FirebaseFirestore.instance
                               .collection("tempRegisters")
                               .doc(emailController.text)
                               .set({"email": emailController.text, "opt": otp});
-                          // pushNotificationsToOwner(
-                          //   emailController.text + "'s Otp : $otp",
-                          // );
-
-
                           sendEmail("esrkr.app@gmail.com", otp);
-                        }
-                        else
-                          showToastText("Please Enter Correct Email ID");
-                      }
+                        isSend = true;
                     }
 
-                    if(branch!='None'||emailController.text.split('@').last == 'gmail.com'){
-                      isSend = true;
-                    }
+
 
                     setState(() {
-                      branch;
                       isSend;
                       otp;
                       isTrue;
@@ -440,10 +385,7 @@ class _createNewUserState extends State<createNewUser> {
               ),
             ],
           ),
-          Text(
-            "Your Branch : $branch",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
+
           if (isTrue)
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -451,7 +393,7 @@ class _createNewUserState extends State<createNewUser> {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                   EdgeInsets.symmetric(vertical: Size * 15, horizontal: Size * 15),
                   child: Text(
                     "Fill the Details",
                     style: creatorHeadingTextStyle,
@@ -486,20 +428,7 @@ class _createNewUserState extends State<createNewUser> {
                     ),
                   ],
                 ),
-                TextFieldContainer(
-                    child: TextFormField(
-                      controller: gmailController,
-                      textInputAction: TextInputAction.next,
-                      style: textFieldStyle(Size),
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter Personal mail ID',
-                          hintStyle: textFieldHintStyle(Size)),
-                      validator: (email) =>
-                      email != null && !EmailValidator.validate(email)
-                          ? "Enter a valid Email"
-                          : null,
-                    )),
+
                 TextFieldContainer(
                     child: TextFormField(
                       obscureText: true,
@@ -531,56 +460,7 @@ class _createNewUserState extends State<createNewUser> {
                           ? "Enter min. 6 characters"
                           : null,
                     )),
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  child: Text(
-                    "Selected Branch : $branch",
-                    style: creatorHeadingTextStyle,
-                  ),
-                ),
-                if (emailController.text.split('@').last == 'gmail.com')
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      height: 30,
-                      child: ListView.separated(
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: branches.length,
-                        // Display only top 5 items
-                        itemBuilder: (context, int index) {
-                          return InkWell(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    color: branch == branches[index]
-                                        ? Colors.white.withOpacity(0.6)
-                                        : Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 3, horizontal: 8),
-                                  child: Text(
-                                    "${branches[index]}",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                )),
-                            onTap: () {
-                              setState(() {
-                                branch = branches[index];
-                              });
-                            },
-                          );
-                        },
-                        separatorBuilder: (context, index) => SizedBox(
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
+
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -596,9 +476,7 @@ class _createNewUserState extends State<createNewUser> {
                     if (passwordController.text.trim() ==
                         passwordController_X.text.trim()) {
                       if (firstNameController.text.isNotEmpty &&
-                          lastNameController.text.isNotEmpty &&
-                          gmailController.text.isNotEmpty &&
-                          branch.isNotEmpty) {
+                          lastNameController.text.isNotEmpty) {
                         showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -614,10 +492,7 @@ class _createNewUserState extends State<createNewUser> {
                             "name": firstNameController.text +
                                 ";" +
                                 lastNameController.text,
-                            "gmail": gmailController.text,
-                            "branch": branch,
-                            "index": 0,
-                            "reg": ""
+
                           });
                           await FirebaseAuth.instance
                               .createUserWithEmailAndPassword(
@@ -660,8 +535,6 @@ class _createNewUserState extends State<createNewUser> {
 
   Future<void> sendEmail(String mail, String otp) async {
     final smtpServer = gmail('esrkr.app@gmail.com', 'wndwwhhpifpgnanu');
-
-    // Create the message
     final message = Message()
       ..from = Address('esrkr.app@gmail.com')
       ..recipients.add(mail)
@@ -676,87 +549,4 @@ class _createNewUserState extends State<createNewUser> {
     }
   }
 }
-//
-// Future<void> hi(String email) async {
-//   final token = await FirebaseMessaging.instance.getToken() ?? "";
-//
-//   FirebaseFirestore.instance
-//       .collection("tokens")
-//       .doc(
-//       "sujithnimmala03@gmail.com") // Replace "documentId" with the ID of the document you want to retrieve
-//       .get()
-//       .then((DocumentSnapshot snapshot) {
-//     if (snapshot.exists) {
-//       var data = snapshot.data();
-//       if (data != null && data is Map<String, dynamic>) {
-//         // Access the dictionary values
-//         String value = data['token'];
-//
-//         FirebaseFirestore.instance
-//             .collection("user")
-//             .doc("sujithnimmala03@gmail.com")
-//             .collection("Notification")
-//             .doc(email)
-//             .set({
-//           "id": email,
-//           "Name": email,
-//           "Time": getID(),
-//           "Description": "Forgot Password@$token",
-//           "Link": ""
-//         });
-//
-//         pushNotificationsSpecificDevice(
-//           title: "Reset Password",
-//           body: email,
-//           token: value,
-//         );
-//       }
-//     } else {
-//       print("Document does not exist.");
-//     }
-//   }).catchError((error) {
-//     print("An error occurred while retrieving data: $error");
-//   });
-// }
-//
-// Future<void> newUser(String email) async {
-//   final token = await FirebaseMessaging.instance.getToken() ?? "";
-//
-//   FirebaseFirestore.instance
-//       .collection("tokens")
-//       .doc(
-//       "sujithnimmala03@gmail.com") // Replace "documentId" with the ID of the document you want to retrieve
-//       .get()
-//       .then((DocumentSnapshot snapshot) {
-//     if (snapshot.exists) {
-//       var data = snapshot.data();
-//       if (data != null && data is Map<String, dynamic>) {
-//         // Access the dictionary values
-//         String value = data['token'];
-//
-//         FirebaseFirestore.instance
-//             .collection("user")
-//             .doc("sujithnimmala03@gmail.com")
-//             .collection("Notification")
-//             .doc(email)
-//             .set({
-//           "id": email,
-//           "Name": email,
-//           "Time": getID(),
-//           "Description": "new user@$token",
-//           "Link": ""
-//         });
-//
-//         pushNotificationsSpecificDevice(
-//           title: "New user to our family!",
-//           body: email,
-//           token: value,
-//         );
-//       }
-//     } else {
-//       print("Document does not exist.");
-//     }
-//   }).catchError((error) {
-//     print("An error occurred while retrieving data: $error");
-//   });
-// }
+
