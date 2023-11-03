@@ -26,121 +26,121 @@ class _electronicProjectsState extends State<electronicProjects> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          StreamBuilder<List<ProjectsConvertor>>(
-            stream: readProjectsConvertor(false, "electronicProjects", "", ""),
-            builder: (context, snapshot) {
-              final Subjects = snapshot.data;
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return const Center(
-                      child: CircularProgressIndicator(
-                    strokeWidth: 0.3,
-                    color: Colors.cyan,
-                  ));
-                default:
-                  if (snapshot.hasError) {
-                    return const Text("Error with server");
-                  } else {
-                    return ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      controller: new ScrollController(keepScrollOffset: false),
-                      itemCount: Subjects!.length,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      padding:  EdgeInsets.only(left: Size*5, right: Size*5),
-                      itemBuilder: (BuildContext context, int index) {
-                        final SubjectsData = Subjects[index];
-                        return InkWell(
-                          child: ContainerForProjectsShowing(
-                            data: SubjectsData,
-                             c0: 'electronicProjects', d0: '', c1: '',
-                          ),
-                          onTap: () async {
-                            List<String> images = [];
-                            images = SubjectsData.photoUrl.split(";");
-                            if (!kIsWeb) {
-                              await showDialog(
-                                context: context,
-                                builder: (context) => ImageDownloadScreen(
-                                  images: images,
-                                  id:SubjectsData.id,
-                                ),
-                              );
-                            }
-
-                            FirebaseFirestore.instance
-                                .collection("electronicProjects")
-                                .doc(SubjectsData.id)
-                                .update({"views": SubjectsData.views + 1});
-                            FirebaseFirestore.instance
-                                .collection("electronicProjects")
-                                .doc(SubjectsData
-                                    .id) // Replace "documentId" with the ID of the document you want to retrieve
-                                .get()
-                                .then((DocumentSnapshot snapshot) async {
-                              if (snapshot.exists) {
-                                var data = snapshot.data();
-                                if (data != null &&
-                                    data is Map<String, dynamic>) {
-                                  Navigator.push(
-                                    context,
-                                    PageRouteBuilder(
-                                      transitionDuration:
-                                          const Duration(milliseconds: 300),
-                                      pageBuilder: (context, animation,
-                                              secondaryAnimation) =>
-                                          electronicProject(
-                                        likes: data['likedBy'],
-                                        tags: SubjectsData.tags.split(";"),
-                                        youtubeUrl: SubjectsData.youtubeUrl,
-                                        views: SubjectsData.views,
-                                        requiredComponents:
-                                            data['requiredComponents'],
-                                        toolsRequired: data['toolsRequired'],
-                                        id: data['id'],
-                                        heading: SubjectsData.heading,
-                                        description: data['description'],
-                                        photoUrl: SubjectsData.photoUrl,
-
-                                        tableOfContent: data['tableOfContent'],
-                                            comments: data["comments"],
-                                      ),
-                                      transitionsBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        final fadeTransition = FadeTransition(
-                                          opacity: animation,
-                                          child: child,
-                                        );
-
-                                        return Container(
-                                          color: Colors.black
-                                              .withOpacity(animation.value),
-                                          child: AnimatedOpacity(
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              opacity: animation.value
-                                                  .clamp(0.3, 1.0),
-                                              child: fadeTransition),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }
-                              } else {
-                                print("Document does not exist.");
-                              }
-                            }).catchError((error) {
-                              print(
-                                  "An error occurred while retrieving data: $error");
-                            });
-                          },
-                        );
-                      },
-                    );
-                  }
-              }
-            },
-          ),
+          // StreamBuilder<List<ProjectsConvertor>>(
+          //   stream: readProjectsConvertor(false, "electronicProjects", "", ""),
+          //   builder: (context, snapshot) {
+          //     final Subjects = snapshot.data;
+          //     switch (snapshot.connectionState) {
+          //       case ConnectionState.waiting:
+          //         return const Center(
+          //             child: CircularProgressIndicator(
+          //           strokeWidth: 0.3,
+          //           color: Colors.cyan,
+          //         ));
+          //       default:
+          //         if (snapshot.hasError) {
+          //           return const Text("Error with server");
+          //         } else {
+          //           return ListView.builder(
+          //             scrollDirection: Axis.vertical,
+          //             controller: new ScrollController(keepScrollOffset: false),
+          //             itemCount: Subjects!.length,
+          //             shrinkWrap: true,
+          //             physics: const BouncingScrollPhysics(),
+          //             padding:  EdgeInsets.only(left: Size*5, right: Size*5),
+          //             itemBuilder: (BuildContext context, int index) {
+          //               final SubjectsData = Subjects[index];
+          //               return InkWell(
+          //                 child: ContainerForProjectsShowing(
+          //                   data: SubjectsData,
+          //                    c0: 'electronicProjects', d0: '', c1: '',
+          //                 ),
+          //                 // onTap: () async {
+          //                 //   List<String> images = [];
+          //                 //   images = SubjectsData.images.split(";");
+          //                 //   if (!kIsWeb) {
+          //                 //     await showDialog(
+          //                 //       context: context,
+          //                 //       builder: (context) => ImageDownloadScreen(
+          //                 //         images: images,
+          //                 //         id:SubjectsData.id,
+          //                 //       ),
+          //                 //     );
+          //                 //   }
+          //                 //
+          //                 //   FirebaseFirestore.instance
+          //                 //       .collection("electronicProjects")
+          //                 //       .doc(SubjectsData.id)
+          //                 //       .update({"views": SubjectsData.views + 1});
+          //                 //   FirebaseFirestore.instance
+          //                 //       .collection("electronicProjects")
+          //                 //       .doc(SubjectsData
+          //                 //           .id) // Replace "documentId" with the ID of the document you want to retrieve
+          //                 //       .get()
+          //                 //       .then((DocumentSnapshot snapshot) async {
+          //                 //     if (snapshot.exists) {
+          //                 //       var data = snapshot.data();
+          //                 //       if (data != null &&
+          //                 //           data is Map<String, dynamic>) {
+          //                 //         Navigator.push(
+          //                 //           context,
+          //                 //           PageRouteBuilder(
+          //                 //             transitionDuration:
+          //                 //                 const Duration(milliseconds: 300),
+          //                 //             pageBuilder: (context, animation,
+          //                 //                     secondaryAnimation) =>
+          //                 //                 electronicProject(
+          //                 //               likes: data['likedBy'],
+          //                 //               tags: SubjectsData.tags.split(";"),
+          //                 //               youtubeUrl: SubjectsData.youtubeUrl,
+          //                 //               views: SubjectsData.views,
+          //                 //               requiredComponents:
+          //                 //                   data['requiredComponents'],
+          //                 //               toolsRequired: data['toolsRequired'],
+          //                 //               id: data['id'],
+          //                 //               heading: SubjectsData.heading,
+          //                 //               description: data['description'],
+          //                 //               photoUrl: SubjectsData.images,
+          //                 //
+          //                 //               tableOfContent: data['tableOfContent'],
+          //                 //                   comments: data["comments"],
+          //                 //             ),
+          //                 //             transitionsBuilder: (context, animation,
+          //                 //                 secondaryAnimation, child) {
+          //                 //               final fadeTransition = FadeTransition(
+          //                 //                 opacity: animation,
+          //                 //                 child: child,
+          //                 //               );
+          //                 //
+          //                 //               return Container(
+          //                 //                 color: Colors.black
+          //                 //                     .withOpacity(animation.value),
+          //                 //                 child: AnimatedOpacity(
+          //                 //                     duration:
+          //                 //                         Duration(milliseconds: 300),
+          //                 //                     opacity: animation.value
+          //                 //                         .clamp(0.3, 1.0),
+          //                 //                     child: fadeTransition),
+          //                 //               );
+          //                 //             },
+          //                 //           ),
+          //                 //         );
+          //                 //       }
+          //                 //     } else {
+          //                 //       print("Document does not exist.");
+          //                 //     }
+          //                 //   }).catchError((error) {
+          //                 //     print(
+          //                 //         "An error occurred while retrieving data: $error");
+          //                 //   });
+          //                 // },
+          //               );
+          //             },
+          //           );
+          //         }
+          //     }
+          //   },
+          // ),
           SizedBox(
             height: Size*150,
           )
@@ -151,18 +151,10 @@ class _electronicProjectsState extends State<electronicProjects> {
 }
 
 
-Stream<List<ProjectsConvertor>> readProjectsConvertor(bool mode, String c0, String d0, String c1) => mode
-        ? FirebaseFirestore.instance
+Stream<List<ProjectsConvertor>> readProjectsConvertor( String c0, String d0, String c1) =>  FirebaseFirestore.instance
             .collection(c0)
             .doc(d0)
             .collection(c1)
-            .snapshots()
-            .map((snapshot) => snapshot.docs
-                .map((doc) => ProjectsConvertor.fromJson(doc.data()))
-                .toList())
-        : FirebaseFirestore.instance
-            .collection(c0)
-            .orderBy("views", descending: true)
             .snapshots()
             .map((snapshot) => snapshot.docs
                 .map((doc) => ProjectsConvertor.fromJson(doc.data()))
@@ -170,35 +162,23 @@ Stream<List<ProjectsConvertor>> readProjectsConvertor(bool mode, String c0, Stri
 
 class ProjectsConvertor {
   String id;
-  final int views, comments;
-  final String heading, photoUrl, tags, youtubeUrl,tableOfContent;
-  List<String> likedBy;
+  final String heading, images,time,VL;
 
   ProjectsConvertor({
     this.id = "",
     required this.heading,
-    this.views = 0,
-    required this.photoUrl,
-    required this.youtubeUrl,
-    required this.tableOfContent,
-    required this.tags,
-     this.comments=0,
-    List<String>? likedBy,
-  }) : likedBy = likedBy ?? [];
-
+    required this.images,
+    required this.time,
+    required this.VL,
+  }) ;
   static ProjectsConvertor fromJson(
           Map<String, dynamic> json) =>
       ProjectsConvertor(
-          views: json["views"],
           id: json['id'],
-          youtubeUrl: json["youtubeLink"],
-          comments: json["comments"],
-          likedBy:
-              json["likedBy"] != null ? List<String>.from(json["likedBy"]) : [],
-          heading: json["heading"],
-          tags: json["tags"],
-          photoUrl: json["images"],
-          tableOfContent: json["tableOfContent"]);
+          heading: json["title"],
+          time: json["time"],
+          images: json["Thumbnails"],
+          VL: json["ViewsLikes"]);
 }
 
 
@@ -245,7 +225,7 @@ class _electronicProjectState extends State<electronicProject> {
     double Size = size(context);
     return backGroundImage(child: SingleChildScrollView(child: Column(
       children: [
-        backButton(size: Size,text: widget.heading.split(";").first,),
+        backButton(text: widget.heading.split(";").first,),
         SingleChildScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),

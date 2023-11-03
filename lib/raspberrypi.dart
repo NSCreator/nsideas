@@ -303,7 +303,7 @@ class _raspberrypiBoardState extends State<raspberrypiBoard> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            backButton(size: Size,text: widget.heading,),
+            backButton(text: widget.heading,),
             Padding(
               padding:  EdgeInsets.all(Size*4.0),
               child: Container(

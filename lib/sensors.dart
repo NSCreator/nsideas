@@ -544,7 +544,7 @@ class _sensorState extends State<sensor> {
           child: Column(
             
           children: [
-            backButton(size: Size*1,text: widget.name,),
+            backButton(text: widget.name,),
             scrollingImages(
               images: images, id: widget.id,
             ),

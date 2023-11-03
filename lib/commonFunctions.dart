@@ -1464,7 +1464,7 @@ class _zoomState extends State<zoom> {
         body: SafeArea(
           child: Column(
             children: [
-              backButton(size: 1),
+              backButton(),
               Expanded(
                 child: Center(
                   child: file.existsSync()?PhotoView(imageProvider: FileImage(file)):PhotoView(imageProvider:NetworkImage(widget.url),

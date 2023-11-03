@@ -10,11 +10,9 @@ import 'arduino.dart';
 import 'commonFunctions.dart';
 
 class backButton extends StatefulWidget {
-  Color color;
-  double size;
   String text;
 
-  backButton({this.color = Colors.white, required this.size, this.text = ""});
+  backButton({ this.text = ""});
 
   @override
   State<backButton> createState() => _backButtonState();
@@ -25,43 +23,35 @@ class _backButtonState extends State<backButton> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InkWell(
-            child: Padding(
+      child: InkWell(
+        onTap: (){
+          Navigator.pop(context);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
               padding: EdgeInsets.only(
-                  left: widget.size * 10, right: widget.size * 10),
+                  left: 10, right:  10),
               child: Icon(
                 Icons.arrow_back,
-                color: widget.color,
-                size: widget.size * 30,
+                size: 25,
               ),
             ),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          if (widget.text.isNotEmpty)
-            Flexible(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: widget.size * 10),
+            if (widget.text.isNotEmpty)
+              Expanded(
                 child: Text(
                   widget.text,
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: widget.size * 30,
-                      fontWeight: FontWeight.w600),
+                      fontSize:  20,),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
               ),
-            ),
-          if (widget.text.isNotEmpty)
-            SizedBox(
-              width: 45,
-            )
-        ],
+
+          ],
+        ),
       ),
     );
   }
@@ -843,7 +833,7 @@ tableOfContentList = widget.tableOfContent.split(";");
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          backButton(size: size(context),text: "Electronic Projects",),
+          backButton(text: "Electronic Projects",),
           const Padding(
             padding: EdgeInsets.only(left: 15, top: 8),
             child: Text(
@@ -1758,7 +1748,6 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           backButton(
-            size: size(context),
             text: "Arduino Boaed",
           ),
           TextFieldContainer(
@@ -2307,7 +2296,6 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           backButton(
-            size: size(context),
             text: "Arduino Projects",
           ),
           Padding(
@@ -3438,7 +3426,7 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          backButton(size: size(context),text: "Description",),
+          backButton(text: "Description",),
           Padding(
             padding: const EdgeInsets.only(left: 15, top: 8),
             child: Text(

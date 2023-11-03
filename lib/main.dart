@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
         splashColor: Colors
             .transparent,
         splashFactory: NoSplash.splashFactory,
-        scaffoldBackgroundColor: Color(0xFF060D0E),
+        // scaffoldBackgroundColor: Color(0xFF060D0E),
       ),
       home:StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),

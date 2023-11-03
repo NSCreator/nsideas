@@ -291,7 +291,6 @@ class _createNewUserState extends State<createNewUser> {
       child: Column(
         children: [
           backButton(
-            size: Size,
             text: "Enter Gmail ID",
           ),
           SizedBox(

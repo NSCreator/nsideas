@@ -244,8 +244,7 @@ class _arduinoAndProjectsState extends State<arduinoAndProjects> {
             ),
           ),
           StreamBuilder<List<ProjectsConvertor>>(
-            stream: readProjectsConvertor(
-                true, "arduino", "arduinoProjects", "projects"),
+            stream: readProjectsConvertor( "arduino", "arduinoProjectsInfo", "arduinoProjectsInfo"),
             builder: (context, snapshot) {
               final Subjects = snapshot.data;
               switch (snapshot.connectionState) {
@@ -265,65 +264,66 @@ class _arduinoAndProjectsState extends State<arduinoAndProjects> {
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, int index) {
                         final SubjectsData = Subjects[index];
-                        return InkWell(
-                          child: ContainerForProjectsShowing(
-                              data: SubjectsData,
-                              c0: 'arduino',
-                              d0: "arduinoProjects",
-                              c1: "projects"),
-                          onTap: () {
-                            FirebaseFirestore.instance
-                                .collection("arduino")
-                                .doc("arduinoProjects")
-                                .collection("projects")
-                                .doc(SubjectsData
-                                .id) // Replace "documentId" with the ID of the document you want to retrieve
-                                .get()
-                                .then((DocumentSnapshot
-                            snapshot) async {
-                              if (snapshot.exists) {
-                                var data = snapshot.data();
-                                if (data != null &&
-                                    data is Map<String,
-                                        dynamic>) {
-                                  FirebaseFirestore.instance
-                                      .collection("arduino")
-                                      .doc("arduinoProjects")
-                                      .collection("projects")
-                                      .doc(SubjectsData.id)
-                                      .update({
-                                    "views":
-                                    SubjectsData.views + 1
-                                  });
-                                  showToastText("+1 view");
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              arduinoProject(
-                                                appsAndPlatforms:data["appsAndPlatforms"],
-
-                                                youtubeUrl: SubjectsData.youtubeUrl,
-                                                id: data['id'],
-                                                heading: SubjectsData.heading,
-                                                description: data['description'],
-                                                photoUrl: SubjectsData.photoUrl.split(";").first,
-                                                tags: SubjectsData.tags.toString().split(";"),
-                                                tableOfContent: data['tableOfContent'],
-                                                views: 0, componentsAndSupplies: data['componentsAndSupplies'],
-                                                comments: data["comments"],
-                                              )));
-                                }
-                              } else {
-                                print(
-                                    "Document does not exist.");
-                              }
-                            }).catchError((error) {
-                              print(
-                                  "An error occurred while retrieving data: $error");
-                            });
-                          },
-                        );
+                        return Container();
+                        // return InkWell(
+                        //   child: ContainerForProjectsShowing(
+                        //       data: SubjectsData,
+                        //       c0: 'arduino',
+                        //       d0: "arduinoProjects",
+                        //       c1: "projects"),
+                        //   // onTap: () {
+                        //   //   FirebaseFirestore.instance
+                        //   //       .collection("arduino")
+                        //   //       .doc("arduinoProjects")
+                        //   //       .collection("projects")
+                        //   //       .doc(SubjectsData
+                        //   //       .id) // Replace "documentId" with the ID of the document you want to retrieve
+                        //   //       .get()
+                        //   //       .then((DocumentSnapshot
+                        //   //   snapshot) async {
+                        //   //     if (snapshot.exists) {
+                        //   //       var data = snapshot.data();
+                        //   //       if (data != null &&
+                        //   //           data is Map<String,
+                        //   //               dynamic>) {
+                        //   //         FirebaseFirestore.instance
+                        //   //             .collection("arduino")
+                        //   //             .doc("arduinoProjects")
+                        //   //             .collection("projects")
+                        //   //             .doc(SubjectsData.id)
+                        //   //             .update({
+                        //   //           "views":
+                        //   //           SubjectsData.views + 1
+                        //   //         });
+                        //   //         showToastText("+1 view");
+                        //   //         Navigator.push(
+                        //   //             context,
+                        //   //             MaterialPageRoute(
+                        //   //                 builder: (context) =>
+                        //   //                     arduinoProject(
+                        //   //                       appsAndPlatforms:data["appsAndPlatforms"],
+                        //   //
+                        //   //                       youtubeUrl: SubjectsData.youtubeUrl,
+                        //   //                       id: data['id'],
+                        //   //                       heading: SubjectsData.heading,
+                        //   //                       description: data['description'],
+                        //   //                       photoUrl: SubjectsData.images.split(";").first,
+                        //   //                       tags: SubjectsData.tags.toString().split(";"),
+                        //   //                       tableOfContent: data['tableOfContent'],
+                        //   //                       views: 0, componentsAndSupplies: data['componentsAndSupplies'],
+                        //   //                       comments: data["comments"],
+                        //   //                     )));
+                        //   //       }
+                        //   //     } else {
+                        //   //       print(
+                        //   //           "Document does not exist.");
+                        //   //     }
+                        //   //   }).catchError((error) {
+                        //   //     print(
+                        //   //         "An error occurred while retrieving data: $error");
+                        //   //   });
+                        //   // },
+                        // );
                       },
                     );
                   }
@@ -411,7 +411,6 @@ class _arduinoBoardState extends State<arduinoBoard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           backButton(
-            size: Size,
             text: widget.heading.split(";").first,
           ),
           Padding(
@@ -582,7 +581,6 @@ class _arduinoProjectState extends State<arduinoProject> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           backButton(
-            size: Size,
             text: widget.heading.split(";").first,
           ),
           Padding(
