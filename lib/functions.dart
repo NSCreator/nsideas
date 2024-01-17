@@ -1,5 +1,4 @@
 // ignore_for_file: use_key_in_widget_constructors, non_constant_identifier_names
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ns_ideas/authPage.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 import 'commonFunctions.dart';
+import 'homepage.dart';
 Stream<List<CommentsConvertor>> readComments(String c0,String d0,String c1,String d1) =>
     c1.isNotEmpty && d1.isNotEmpty?FirebaseFirestore.instance
         .collection(c0)
@@ -31,6 +29,118 @@ Stream<List<CommentsConvertor>> readComments(String c0,String d0,String c1,Strin
         .map((snapshot) => snapshot.docs
         .map((doc) => CommentsConvertor.fromJson(doc.data()))
         .toList());
+class youtubeInfo extends StatefulWidget {
+  String url;
+   youtubeInfo({required this.url});
+
+  @override
+  State<youtubeInfo> createState() => _youtubeInfoState();
+}
+
+class _youtubeInfoState extends State<youtubeInfo> {
+
+  @override
+  Widget build(BuildContext context) {
+    double Size=size(context);
+    return Padding(
+      padding:  EdgeInsets.all(Size*4.0),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(Size*35),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  "Making Video",
+                  style: TextStyle(
+                      fontSize: Size*20,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  InkWell(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(Size*20)),
+                      child: Padding(
+                        padding:  EdgeInsets.symmetric(vertical:Size*5.0,horizontal: 15),
+                        child: Text(
+                          "Play",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: Size*20),
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      showDialog<void>(
+                        context: context,
+                        barrierDismissible:
+                        false, // user must tap button!
+                        builder: (BuildContext context) {
+                          return youtube(
+                            url: widget.url,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  InkWell(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(Size*20)),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding:  EdgeInsets.symmetric(vertical:Size*5.0,horizontal: 15),
+                            child: Text(
+                              "View On",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: Size*20),
+                            ),
+                          ),
+                          Container(
+                              height: Size*40,
+                              width: Size*100,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: const DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                          "https://ghiencongnghe.info/wp-content/uploads/2021/02/bia-youtube-la-gi.gif"))))
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      ExternalLaunchUrl(widget.url);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    )
+    ;
+  }
+}
+
 
 
 class CommentsConvertor {
@@ -62,159 +172,11 @@ class CommentsConvertor {
           );
 }
 
-downloadImagesForAllPage(BuildContext context) async {
-  List<String> list = [];
-  final directory = await getApplicationDocumentsDirectory();
-  String folderPath = directory.path;
-  try {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("arduino")
-        .doc("arduinoBoards")
-        .collection("Board").get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (final document in documents) {
-        final data = document.data() as Map<String, dynamic>;
-        if (data["images"].toString().split(";").first.length > 3) {
-          final Uri uri = Uri.parse(data["images"].toString().split(";").first);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = File("$folderPath/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["images"].toString().split(";").first};" + data["id"]);
-          }
-        }
-      }
-    }
-  } catch (e) {
-    print('Error: $e');
-  }
-  
-  try {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("arduino")
-        .doc("arduinoProjects")
-        .collection("projects").get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (final document in documents) {
-        final data = document.data() as Map<String, dynamic>;
-        if (data["images"].toString().split(";").first.length > 3) {
-          final Uri uri = Uri.parse(data["images"].toString().split(";").first);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["images"].toString().split(";").first};" + data["id"]);
-          }
-        }    if (data["images"].toString().split(";").last.length > 3) {
-          final Uri uri = Uri.parse(data["images"].toString().split(";").last);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["images"].toString().split(";").last};" + data["id"]);
-          }
-        }
-
-      }
-    }
-  } catch (e) {
-    print('Error: $e');
-  }
-
-  try {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('raspberrypi')
-        .doc("raspberrypiBoard")
-        .collection("Boards").get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (final document in documents) {
-        final data = document.data() as Map<String, dynamic>;
-        if (data["photoUrl"].toString().split(";").first.length > 3) {
-          final Uri uri = Uri.parse(data["photoUrl"].toString().split(";").first);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["photoUrl"].toString().split(";").first};" + data["id"]);
-          }
-        }
-
-
-      }
-    }
-  } catch (e) {
-    print('Error: $e');
-  }
-
-  try {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("electronicProjects").get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (final document in documents) {
-        final data = document.data() as Map<String, dynamic>;
-        if (data["images"].toString().split(";").first.length > 3) {
-          final Uri uri = Uri.parse(data["images"].toString().split(";").first);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["images"].toString().split(";").first};" + data["id"]);
-          }
-        }    if (data["images"].toString().split(";").last.length > 3) {
-          final Uri uri = Uri.parse(data["images"].toString().split(";").last);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["images"].toString().split(";").last};" + data["id"]);
-          }
-        }
-
-      }
-    }
-  } catch (e) {
-    print('Error: $e');
-  }
-
-  try {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("sensors").get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (final document in documents) {
-        final data = document.data() as Map<String, dynamic>;
-
-        if (data["photoUrl"].toString().split(";").first.length > 3) {
-          final Uri uri = Uri.parse(data["photoUrl"].toString().split(";").first);
-          final String fileName = uri.pathSegments.last;
-          var name = fileName.split("/").last;
-          final file = await File("${folderPath}/${data['id']}/$name");
-          if (!file.existsSync()) {
-            list.add("${data["photoUrl"].toString().split(";").first};" + data["id"]);
-          }
-        }
-
-      }
-    }
-  } catch (e) {
-    print('Error: $e');
-  }
-  print(list);
-  if(list.isNotEmpty) {
-    await showDialog(
-    context: context,
-    builder: (context) =>
-        ImageDownloadsScreen(
-          images: list,
-        ),
-  );
-  }
-
-
-}
 Future<void> InternalLaunchUrl(String url) async {
   final Uri urlIn = Uri.parse(url);
-  if (!await launchUrl(urlIn, mode: LaunchMode.inAppWebView))
+  if (!await launchUrl(urlIn, mode: LaunchMode.inAppWebView)) {
     throw 'Could not launch $urlIn';
+  }
 }
 
 SendingMails(String urlIn) async {
@@ -258,8 +220,9 @@ Future<void> showToastText(String message) async {
 class scrollingImages extends StatefulWidget {
   final List images;
   final String id;
+  bool isZoom;
 
-  const scrollingImages({Key? key, required this.images,required this.id}) : super(key: key);
+   scrollingImages({Key? key, required this.images,required this.id,this.isZoom=false}) : super(key: key);
 
   @override
   State<scrollingImages> createState() => _scrollingImagesState();
@@ -269,43 +232,20 @@ class _scrollingImagesState extends State<scrollingImages> {
   String imagesDirPath='';
   int currentPos = 0;
 
-  File file=File("");
-  getPath()
-  async{
-    final Directory appDir = await getApplicationDocumentsDirectory();
-    imagesDirPath = '${appDir.path}/${widget.id}';
-    if(widget.images.length ==1){
-      final Uri uri = Uri.parse(widget.images.first);
-      final String filename = uri.pathSegments.last;
-      file = File('$imagesDirPath/$filename');
-    }
-    setState(() {
-      imagesDirPath;
-    });
-  }
 
-@override
-  void initState() {
-
-    super.initState();
-    getPath();
-  }
   @override
   Widget build(BuildContext context) {
     double Size=size(context);
-    return widget.images.length > 1
-        ? Column(
+    return Column(
       children: [
         CarouselSlider.builder(
             itemCount: widget.images.length,
             options: CarouselOptions(
-                // height: 260, // Adjust this value to set the desired height of the carousel
-
                 viewportFraction: 1.0,
                 enableInfiniteScroll: true,
-                autoPlay: true,
-                autoPlayInterval: Duration(seconds: 3),
-                autoPlayAnimationDuration: Duration(milliseconds: 800),
+                autoPlay: widget.images.length > 1?true:false,
+                autoPlayInterval: const Duration(seconds: 3),
+                autoPlayAnimationDuration: const Duration(milliseconds: 800),
                 autoPlayCurve: Curves.fastOutSlowIn,
                 onPageChanged: (index, reason) {
                   setState(() {
@@ -314,17 +254,16 @@ class _scrollingImagesState extends State<scrollingImages> {
                 }),
             itemBuilder: (BuildContext context, int itemIndex,
                 int pageViewIndex) {
-              final Uri uri = Uri.parse(widget.images[itemIndex]);
-              final String filename = uri.pathSegments.last;
-              file = File('$imagesDirPath/$filename');
-              return AspectRatio(
-                  aspectRatio: 16/9,
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Size*10),
 
-                      child: Image.file(file,fit: BoxFit.fill,)));
+              return ClipRRect(
+                  borderRadius: BorderRadius.circular(Size*10),
+                  child: ImageShowAndDownload(
+              image: widget.images[itemIndex],
+              id: widget.id,
+                    isZoom: widget.isZoom,
+              ));
             }),
-        Row(
+        if(widget.images.length > 1)Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: widget.images.map((url) {
             int index = widget.images.indexOf(url);
@@ -343,11 +282,6 @@ class _scrollingImagesState extends State<scrollingImages> {
           }).toList(),
         ),
       ],
-    )
-        : ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-
-          child: Image.file(file,),
-        );
+    );
   }
 }

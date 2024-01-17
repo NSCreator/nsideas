@@ -3,16 +3,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'homepage.dart';
-import 'authPage.dart';
-import 'main.dart';
 import 'raspberrypi.dart';
-import 'arduino.dart';
 import 'commonFunctions.dart';
 
 class backButton extends StatefulWidget {
   String text;
 
-  backButton({ this.text = ""});
+  backButton({super.key,  this.text = ""});
 
   @override
   State<backButton> createState() => _backButtonState();
@@ -33,10 +30,11 @@ class _backButtonState extends State<backButton> {
           children: [
             Padding(
               padding: EdgeInsets.only(
-                  left: 10, right:  10),
+                  left: 10, right:  5),
               child: Icon(
                 Icons.arrow_back,
-                size: 25,
+                size: 20,
+                color: Colors.white,
               ),
             ),
             if (widget.text.isNotEmpty)
@@ -44,9 +42,10 @@ class _backButtonState extends State<backButton> {
                 child: Text(
                   widget.text,
                   style: TextStyle(
-                      fontSize:  20,),
+                      fontSize:  16,color: Colors.white),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
+
                 ),
               ),
 
@@ -77,7 +76,7 @@ class TextFieldContainer extends StatefulWidget {
   Widget child;
   String heading;
 
-  TextFieldContainer({required this.child, this.heading = ""});
+  TextFieldContainer({super.key, required this.child, this.heading = ""});
 
   @override
   State<TextFieldContainer> createState() => _TextFieldContainerState();
@@ -104,7 +103,7 @@ class _TextFieldContainerState extends State<TextFieldContainer> {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white24,
-              border: Border.all(color: Colors.white54),
+              // border: Border.all(color: Colors.white54),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Padding(
@@ -488,8 +487,9 @@ class _electronicProjectsCreatorState extends State<electronicProjectsCreator> {
 
   void AutoFill() {
     HeadingFirstController.text = widget.heading.split(";").first;
-    if (widget.heading.split(";").length > 1)
+    if (widget.heading.split(";").length > 1) {
       HeadingLastController.text = widget.heading.split(";").last;
+    }
     DescriptionController.text = widget.description;
     ImageList= widget.photoUrl.split(";");
 TagsList = widget.tags.split(";");
@@ -1610,9 +1610,7 @@ tableOfContentList = widget.tableOfContent.split(";");
                 onTap: () {
                   String HeadingText = "";
                   if (HeadingLastController.text.isNotEmpty) {
-                    HeadingText = HeadingFirstController.text +
-                        ";" +
-                        HeadingLastController.text;
+                    HeadingText = "${HeadingFirstController.text};${HeadingLastController.text}";
                   } else {
                     HeadingText = HeadingFirstController.text;
                   }
@@ -1751,6 +1749,7 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
             text: "Arduino Boaed",
           ),
           TextFieldContainer(
+            heading: "Board Heading",
             child: TextFormField(
               controller: nameController,
               textInputAction: TextInputAction.next,
@@ -1760,9 +1759,9 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
                   hintText: 'Heading',
                   hintStyle: TextStyle(color: Colors.white54)),
             ),
-            heading: "Board Heading",
           ),
           TextFieldContainer(
+            heading: "Board Description",
             child: TextFormField(
               controller: DescriptionController,
               textInputAction: TextInputAction.next,
@@ -1772,9 +1771,9 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
                   hintText: 'Description',
                   hintStyle: TextStyle(color: Colors.white54)),
             ),
-            heading: "Board Description",
           ),
           TextFieldContainer(
+            heading: "Board Images",
             child: TextFormField(
               controller: PhotoUrl,
               textInputAction: TextInputAction.next,
@@ -1784,9 +1783,9 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
                   hintText: 'Images',
                   hintStyle: TextStyle(color: Colors.white54)),
             ),
-            heading: "Board Images",
           ),
           TextFieldContainer(
+            heading: "Board Pin Out ",
             child: TextFormField(
               controller: CircuitDiagram,
               textInputAction: TextInputAction.next,
@@ -1796,7 +1795,6 @@ class _arduinoBoardCreatorState extends State<arduinoBoardCreator> {
                   hintText: 'Pin Out',
                   hintStyle: TextStyle(color: Colors.white54)),
             ),
-            heading: "Board Pin Out ",
           ),
           const SizedBox(
             height: 10,
@@ -1903,7 +1901,7 @@ class arduinoProjectCreator extends StatefulWidget {
   List appsAndPlatforms,componentsAndSupplies;
 
   arduinoProjectCreator(
-      {Key? key,
+      {super.key,
       this.tableOfContent = "",
       this.tags = "",
       this.description = "",
@@ -1926,8 +1924,6 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
   final tableOfContentController = TextEditingController();
   final componentsAndSuppliesController = TextEditingController();
 
-  final PhotoUrl = TextEditingController();
-  final VideoUrl = TextEditingController();
 
 
 
@@ -1938,8 +1934,6 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
       HeadingLastController.text = widget.heading.split(";").last;
     }
     DescriptionController.text = widget.description;
-    ImageList = widget.images.split(";");
-    VideoUrl.text = widget.youtubeLink;
     tableOfContentList = widget.tableOfContent.split(";");
     TagsList = widget.tags.split(";");
     requiredComponentsList = widget.appsAndPlatforms;
@@ -1951,9 +1945,6 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
     if (widget.id.isNotEmpty) AutoFill();
     super.initState();
   }
-  
-  List ImageList = [];
-  final TextEditingController _ImageController = TextEditingController();
   int selectedImageIndex = -1;
 
   List tableOfContentList = [];
@@ -1977,67 +1968,6 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
 
   final CircuitDiagram = TextEditingController();
 
-  void addImages() {
-    String points = _ImageController.text;
-    if (points.isNotEmpty) {
-      setState(() {
-        ImageList.add(points);
-        _ImageController.clear();
-      });
-    }
-  }
-
-  void editImages(int index) {
-    setState(() {
-      selectedImageIndex = index;
-      _ImageController.text = ImageList[index];
-    });
-  }
-
-  void saveImages() {
-    String editedImage = _ImageController.text;
-    if (editedImage.isNotEmpty && selectedImageIndex != -1) {
-      setState(() {
-        ImageList[selectedImageIndex] = editedImage;
-        _ImageController.clear();
-        selectedImageIndex = -1;
-      });
-    }
-  }
-
-  void deleteImages(int index) {
-    setState(() {
-      ImageList.removeAt(index);
-      if (selectedImageIndex == index) {
-        selectedImageIndex = -1;
-        _ImageController.clear();
-      }
-    });
-  }
-
-  void moveImagesUp(int index) {
-    if (index > 0) {
-      setState(() {
-        String point = ImageList.removeAt(index);
-        ImageList.insert(index - 1, point);
-        if (selectedImageIndex == index) {
-          selectedImageIndex--;
-        }
-      });
-    }
-  }
-
-  void moveImagesDown(int index) {
-    if (index < ImageList.length - 1) {
-      setState(() {
-        String Image = ImageList.removeAt(index);
-        ImageList.insert(index + 1, Image);
-        if (selectedImageIndex == index) {
-          selectedImageIndex++;
-        }
-      });
-    }
-  }
 
   void addTags() {
     String points = _TagsController.text;
@@ -2290,794 +2220,653 @@ class _arduinoProjectCreatorState extends State<arduinoProjectCreator> {
   @override
   Widget build(BuildContext context) {
     return backGroundImage(
-        child: SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          backButton(
-            text: "Arduino Projects",
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Images",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
+        text: "Arduino Projects",
 
-            itemCount: ImageList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: Key(ImageList[index]),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (direction) {
-                  deleteImages(index);
-                },
-                child: ListTile(
-                  title: Text(ImageList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
-                  trailing: SingleChildScrollView(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleteImages(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            editImages(index);
-                          },
-                        ),
-                        InkWell(
-                          child: Icon(
-                            Icons.move_up,
-                            size: 30,
-                          ),
-                          onTap: () {
-                            moveImagesUp(index);
-                          },
-                          onDoubleTap: () {
-                            moveImagesDown(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    editImages(index);
-                  },
-                ),
-              );
-            },
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, top: 5, bottom: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      border:
-                      Border.all(color: Colors.white.withOpacity(0.6)),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+
+
+            const Padding(
+              padding: EdgeInsets.only(left: 15, top: 8),
+              child: Text(
+                "Project Heading",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+              child: Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: TextFieldContainer(
                       child: TextFormField(
-                        controller: _ImageController,
-                        style: TextStyle(color: Colors.black),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
+                        controller: HeadingFirstController,
+                        textInputAction: TextInputAction.next,
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'Enter Images Here',
-                            hintStyle: TextStyle(color: Colors.black),
-                            hoverColor: Colors.black,
-                            labelStyle: TextStyle(color: Colors.black)),
+                            hintText: 'First',
+                            hintStyle: TextStyle(color: Colors.white54)),
                       ),
                     ),
                   ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 45,
-                  ),
-                ),
-                onTap: () {
-                  addImages();
-                },
-              )
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Project Heading",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-            child: Row(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: TextFieldContainer(
-                    child: TextFormField(
-                      controller: HeadingFirstController,
+                  Flexible(
+                    flex: 2,
+                    child: TextFieldContainer(
+                        child: TextFormField(
+                      controller: HeadingLastController,
                       textInputAction: TextInputAction.next,
                       style: TextStyle(color: Colors.white, fontSize: 20),
                       decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'First',
+                          hintText: 'Last',
                           hintStyle: TextStyle(color: Colors.white54)),
+                    )),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15, top: 8),
+              child: Text(
+                "Tags",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
+              ),
+            ),
+            ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+
+              itemCount: TagsList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: Key(TagsList[index]),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
                     ),
                   ),
-                ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    deleteTags(index);
+                  },
+                  child: ListTile(
+                    title: Text(TagsList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
+                    trailing: SingleChildScrollView(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              deleteTags(index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              editTags(index);
+                            },
+                          ),
+                          InkWell(
+                            child: Icon(
+                              Icons.move_up,
+                              size: 30,
+                            ),
+                            onTap: () {
+                              moveTagsUp(index);
+                            },
+                            onDoubleTap: () {
+                              moveTagsDown(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      editTags(index);
+                    },
+                  ),
+                );
+              },
+            ),
+            Row(
+              children: [
                 Flexible(
-                  flex: 2,
-                  child: TextFieldContainer(
-                      child: TextFormField(
-                    controller: HeadingLastController,
-                    textInputAction: TextInputAction.next,
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                    decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Last',
-                        hintStyle: TextStyle(color: Colors.white54)),
-                  )),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Tags",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-
-            itemCount: TagsList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: Key(TagsList[index]),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (direction) {
-                  deleteTags(index);
-                },
-                child: ListTile(
-                  title: Text(TagsList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
-                  trailing: SingleChildScrollView(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleteTags(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            editTags(index);
-                          },
-                        ),
-                        InkWell(
-                          child: Icon(
-                            Icons.move_up,
-                            size: 30,
-                          ),
-                          onTap: () {
-                            moveTagsUp(index);
-                          },
-                          onDoubleTap: () {
-                            moveTagsDown(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    editTags(index);
-                  },
-                ),
-              );
-            },
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, top: 5, bottom: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      border:
-                      Border.all(color: Colors.white.withOpacity(0.6)),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: TextFormField(
-                        controller: _TagsController,
-                        style: TextStyle(color: Colors.black),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter Tags Here',
-                            hintStyle: TextStyle(color: Colors.black),
-                            hoverColor: Colors.black,
-                            labelStyle: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 45,
-                  ),
-                ),
-                onTap: () {
-                  addTags();
-                },
-              )
-            ],
-          ),
-          TextFieldContainer(
-            child: TextFormField(
-              controller: DescriptionController,
-              textInputAction: TextInputAction.next,
-              style: TextStyle(color: Colors.white, fontSize: 20),
-              decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Description',
-                  hintStyle: TextStyle(color: Colors.white54)),
-            ),
-            heading: "Project Description",
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Table Of Content",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-
-            itemCount: tableOfContentList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: Key(tableOfContentList[index]),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (direction) {
-                  deletetableOfContent(index);
-                },
-                child: ListTile(
-                  title: Text(tableOfContentList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
-                  trailing: SingleChildScrollView(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deletetableOfContent(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            edittableOfContent(index);
-                          },
-                        ),
-                        InkWell(
-                          child: Icon(
-                            Icons.move_up,
-                            size: 30,
-                          ),
-                          onTap: () {
-                            movetableOfContentUp(index);
-                          },
-                          onDoubleTap: () {
-                            movetableOfContentDown(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    edittableOfContent(index);
-                  },
-                ),
-              );
-            },
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, top: 5, bottom: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      border:
-                      Border.all(color: Colors.white.withOpacity(0.6)),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: TextFormField(
-                        controller: _tableOfContentController,
-                        style: TextStyle(color: Colors.black),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter tableOfContent Here',
-                            hintStyle: TextStyle(color: Colors.black),
-                            hoverColor: Colors.black,
-                            labelStyle: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 45,
-                  ),
-                ),
-                onTap: () {
-                  addtableOfContent();
-                },
-              )
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Project Components And Supplies",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-
-            itemCount: toolsRequiredList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: Key(toolsRequiredList[index]),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (direction) {
-                  deletetoolsRequired(index);
-                },
-                child: ListTile(
-                  title: Text(toolsRequiredList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
-                  trailing: SingleChildScrollView(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deletetoolsRequired(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            edittoolsRequired(index);
-                          },
-                        ),
-                        InkWell(
-                          child: Icon(
-                            Icons.move_up,
-                            size: 30,
-                          ),
-                          onTap: () {
-                            movetoolsRequiredUp(index);
-                          },
-                          onDoubleTap: () {
-                            movetoolsRequiredDown(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    edittoolsRequired(index);
-                  },
-                ),
-              );
-            },
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, top: 5, bottom: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      border:
-                      Border.all(color: Colors.white.withOpacity(0.6)),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: TextFormField(
-                        controller: _toolsRequiredController,
-                        style: TextStyle(color: Colors.black),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Components And Supplies',
-                            hintStyle: TextStyle(color: Colors.black),
-                            hoverColor: Colors.black,
-                            labelStyle: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 45,
-                  ),
-                ),
-                onTap: () {
-                  addtoolsRequired();
-                },
-              )
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, top: 8),
-            child: Text(
-              "Apps And Platforms",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            ),
-          ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: requiredComponentsList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: Key(requiredComponentsList[index]),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (direction) {
-                  deleterequiredComponents(index);
-                },
-                child: ListTile(
-                  title: Text(requiredComponentsList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
-                  trailing: SingleChildScrollView(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleterequiredComponents(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            editrequiredComponents(index);
-                          },
-                        ),
-                        InkWell(
-                          child: Icon(
-                            Icons.move_up,
-                            size: 30,
-                          ),
-                          onTap: () {
-                            moverequiredComponentsUp(index);
-                          },
-                          onDoubleTap: () {
-                            moverequiredComponentsDown(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    editrequiredComponents(index);
-                  },
-                ),
-              );
-            },
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 10, right: 10, top: 5, bottom: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      border:
-                      Border.all(color: Colors.white.withOpacity(0.6)),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: TextFormField(
-                        controller: _appsAndPlatformsController,
-                        style: TextStyle(color: Colors.black),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter Apps And Platforms',
-                            hintStyle: TextStyle(color: Colors.black),
-                            hoverColor: Colors.black,
-                            labelStyle: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 45,
-                  ),
-                ),
-                onTap: () {
-                  addrequiredComponents();
-                },
-              )
-            ],
-          ),
-          TextFieldContainer(
-            child: TextFormField(
-              controller: VideoUrl,
-              textInputAction: TextInputAction.next,
-              style: TextStyle(color: Colors.white, fontSize: 20),
-              decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'YouTube Link',
-                  hintStyle: TextStyle(color: Colors.white54)),
-            ),
-            heading: "Project Youtube Link",
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Spacer(),
-              InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.white.withOpacity(0.5),
-                    border: Border.all(color: Colors.white),
-                  ),
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 10, right: 10, top: 5, bottom: 5),
-                    child: Text("Back"),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              InkWell(
-                onTap: () {
-                  String HeadingText = "";
-                  if (HeadingLastController.text.isNotEmpty) {
-                    HeadingText = HeadingFirstController.text +
-                        ";" +
-                        HeadingLastController.text;
-                  } else {
-                    HeadingText = HeadingFirstController.text;
-                  }
-                  if (widget.id.length < 3) {
-                    String id = getID();
-                    FirebaseFirestore.instance
-                        .collection('arduino')
-                        .doc("arduinoProjects")
-                        .collection("projects")
-                        .doc(id)
-                        .set({
-                      "id": id,
-                      "appsAndPlatforms":requiredComponentsList,
-                      "componentsAndSupplies":toolsRequiredList,
-                      "tableOfContent": tableOfContentList.join(";"),
-                      "tags": TagsList.join(";"),
-                      "likedBy": [],
-                      "heading": HeadingText,
-                      "comments":0,
-                      "views": 0,
-                      "youtubeLink": VideoUrl.text.trim(),
-                      "description": DescriptionController.text.trim(),
-                      "images": ImageList.join(";")
-                    });
-                  } else {
-                    FirebaseFirestore.instance
-                        .collection('arduino')
-                        .doc("arduinoProjects")
-                        .collection("projects")
-                        .doc(widget.id)
-                        .update({
-                      "appsAndPlatforms":requiredComponentsList,
-                      "componentsAndSupplies":toolsRequiredList,
-                      "tableOfContent": tableOfContentList.join(";"),
-                      "tags": TagsList.join(";"),
-                      "heading": HeadingText,
-
-                      "youtubeLink": VideoUrl.text.trim(),
-                      "description": DescriptionController.text.trim(),
-                      "images": ImageList.join(";")
-                    });
-                  }
-                  Navigator.pop(context);
-                },
-                child: widget.id.length < 3
-                    ? Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white.withOpacity(0.5),
-                          border: Border.all(color: Colors.white),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, top: 5, bottom: 5),
-                          child: Text("Create"),
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white.withOpacity(0.5),
-                          border: Border.all(color: Colors.white),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, top: 5, bottom: 5),
-                          child: Text("Update"),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        border:
+                        Border.all(color: Colors.white.withOpacity(0.6)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: TextFormField(
+                          controller: _TagsController,
+                          style: TextStyle(color: Colors.black),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter Tags Here',
+                              hintStyle: TextStyle(color: Colors.black),
+                              hoverColor: Colors.black,
+                              labelStyle: TextStyle(color: Colors.black)),
                         ),
                       ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 45,
+                    ),
+                  ),
+                  onTap: () {
+                    addTags();
+                  },
+                )
+              ],
+            ),
+            TextFieldContainer(
+              heading: "Project Description",
+              child: TextFormField(
+                controller: DescriptionController,
+                textInputAction: TextInputAction.next,
+                style: TextStyle(color: Colors.white, fontSize: 20),
+                decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Description',
+                    hintStyle: TextStyle(color: Colors.white54)),
               ),
-              SizedBox(
-                width: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15, top: 8),
+              child: Text(
+                "Table Of Content",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
               ),
-            ],
-          )
-        ],
-      ),
-    ));
+            ),
+            ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+
+              itemCount: tableOfContentList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: Key(tableOfContentList[index]),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    deletetableOfContent(index);
+                  },
+                  child: ListTile(
+                    title: Text(tableOfContentList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
+                    trailing: SingleChildScrollView(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              deletetableOfContent(index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              edittableOfContent(index);
+                            },
+                          ),
+                          InkWell(
+                            child: Icon(
+                              Icons.move_up,
+                              size: 30,
+                            ),
+                            onTap: () {
+                              movetableOfContentUp(index);
+                            },
+                            onDoubleTap: () {
+                              movetableOfContentDown(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      edittableOfContent(index);
+                    },
+                  ),
+                );
+              },
+            ),
+            Row(
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 10, right: 10, top: 5, bottom: 5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        border:
+                        Border.all(color: Colors.white.withOpacity(0.6)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: TextFormField(
+                          controller: _tableOfContentController,
+                          style: TextStyle(color: Colors.black),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter tableOfContent Here',
+                              hintStyle: TextStyle(color: Colors.black),
+                              hoverColor: Colors.black,
+                              labelStyle: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 45,
+                    ),
+                  ),
+                  onTap: () {
+                    addtableOfContent();
+                  },
+                )
+              ],
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 15, top: 8),
+              child: Text(
+                "Project Components And Supplies",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
+              ),
+            ),
+            ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+
+              itemCount: toolsRequiredList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: Key(toolsRequiredList[index]),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    deletetoolsRequired(index);
+                  },
+                  child: ListTile(
+                    title: Text(toolsRequiredList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
+                    trailing: SingleChildScrollView(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              deletetoolsRequired(index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              edittoolsRequired(index);
+                            },
+                          ),
+                          InkWell(
+                            child: Icon(
+                              Icons.move_up,
+                              size: 30,
+                            ),
+                            onTap: () {
+                              movetoolsRequiredUp(index);
+                            },
+                            onDoubleTap: () {
+                              movetoolsRequiredDown(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      edittoolsRequired(index);
+                    },
+                  ),
+                );
+              },
+            ),
+            Row(
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 10, right: 10, top: 5, bottom: 5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        border:
+                        Border.all(color: Colors.white.withOpacity(0.6)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: TextFormField(
+                          controller: _toolsRequiredController,
+                          style: TextStyle(color: Colors.black),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Components And Supplies',
+                              hintStyle: TextStyle(color: Colors.black),
+                              hoverColor: Colors.black,
+                              labelStyle: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 45,
+                    ),
+                  ),
+                  onTap: () {
+                    addtoolsRequired();
+                  },
+                )
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15, top: 8),
+              child: Text(
+                "Apps And Platforms",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
+              ),
+            ),
+            ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: requiredComponentsList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: Key(requiredComponentsList[index]),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    deleterequiredComponents(index);
+                  },
+                  child: ListTile(
+                    title: Text(requiredComponentsList[index],style: TextStyle(color: Colors.white70,fontSize: 15,fontWeight: FontWeight.w500),),
+                    trailing: SingleChildScrollView(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              deleterequiredComponents(index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              editrequiredComponents(index);
+                            },
+                          ),
+                          InkWell(
+                            child: Icon(
+                              Icons.move_up,
+                              size: 30,
+                            ),
+                            onTap: () {
+                              moverequiredComponentsUp(index);
+                            },
+                            onDoubleTap: () {
+                              moverequiredComponentsDown(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      editrequiredComponents(index);
+                    },
+                  ),
+                );
+              },
+            ),
+            Row(
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 10, right: 10, top: 5, bottom: 5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        border:
+                        Border.all(color: Colors.white.withOpacity(0.6)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: TextFormField(
+                          controller: _appsAndPlatformsController,
+                          style: TextStyle(color: Colors.black),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter Apps And Platforms',
+                              hintStyle: TextStyle(color: Colors.black),
+                              hoverColor: Colors.black,
+                              labelStyle: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 45,
+                    ),
+                  ),
+                  onTap: () {
+                    addrequiredComponents();
+                  },
+                )
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                Spacer(),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white.withOpacity(0.5),
+                      border: Border.all(color: Colors.white),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 10, right: 10, top: 5, bottom: 5),
+                      child: Text("Back"),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                InkWell(
+                  onTap: () {
+                    String HeadingText = "";
+                    if (HeadingLastController.text.isNotEmpty) {
+                      HeadingText = "${HeadingFirstController.text};${HeadingLastController.text}";
+                    } else {
+                      HeadingText = HeadingFirstController.text;
+                    }
+                    if (widget.id.length < 3) {
+                      String id = getID();
+                      FirebaseFirestore.instance
+                          .collection('arduino')
+                          .doc("arduinoProjects")
+                          .collection("projects")
+                          .doc(id)
+                          .set({
+                        "id": id,
+                        "appsAndPlatforms":requiredComponentsList,
+                        "componentsAndSupplies":toolsRequiredList,
+                        "tableOfContent": tableOfContentList.join(";"),
+                        "tags": TagsList.join(";"),
+                        "heading": HeadingText,
+                        "description": DescriptionController.text.trim(),
+                      });
+                    } else {
+                      FirebaseFirestore.instance
+                          .collection('arduino')
+                          .doc("arduinoProjects")
+                          .collection("projects")
+                          .doc(widget.id)
+                          .update({
+                        "appsAndPlatforms":requiredComponentsList,
+                        "componentsAndSupplies":toolsRequiredList,
+                        "tableOfContent": tableOfContentList.join(";"),
+                        "tags": TagsList.join(";"),
+                        "heading": HeadingText,
+
+                        "description": DescriptionController.text.trim(),
+                      });
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: widget.id.length < 3
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white.withOpacity(0.5),
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 10, right: 10, top: 5, bottom: 5),
+                            child: Text("Create"),
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white.withOpacity(0.5),
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 10, right: 10, top: 5, bottom: 5),
+                            child: Text("Update"),
+                          ),
+                        ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+              ],
+            )
+          ],
+        ));
   }
 }
 
@@ -3607,7 +3396,7 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
                     ),
                   ),
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  columnWidths: {
+                  columnWidths: const {
                     0: FractionColumnWidth(0.2),
                     1: FractionColumnWidth(0.6),
                     2: FractionColumnWidth(0.2),
@@ -3617,9 +3406,9 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(0.3),
                       ),
-                      children: [
+                      children: const [
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: Text(
                             'Name',
                             textAlign: TextAlign.center,
@@ -3631,7 +3420,7 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: Text(
                             'Score',
                             textAlign: TextAlign.center,
@@ -3643,7 +3432,7 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: Text(
                             'Actions',
                             textAlign: TextAlign.center,
@@ -3673,7 +3462,7 @@ class _DescriptionCreatorState extends State<DescriptionCreator> {
                         : BorderRadius.circular(0),
                   ),
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  columnWidths: {
+                  columnWidths: const {
                     0: FractionColumnWidth(0.2),
                     1: FractionColumnWidth(0.6),
                     2: FractionColumnWidth(0.2),

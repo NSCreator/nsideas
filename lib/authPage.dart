@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'raspberrypi.dart';
 import 'textField.dart';
 import 'functions.dart';
@@ -20,240 +20,10 @@ double size(BuildContext context) {
   double screenHeight = ((mediaQuery.size.height/900)+(mediaQuery.size.width/400))/2;
   return screenHeight;
 }
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-     double Size = size(context);
-
-    return backGroundImage(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "NS Ideas ",
-                    style: TextStyle(
-                        fontSize: Size * 30,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.deepOrange),
-                  ),
-                  SizedBox(
-                    height: Size * 10,
-                  ),
-                  Text(
-                    "Welcome Back!",
-                    style: TextStyle(
-                        fontSize: Size * 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: Size * 40,
-                  ),
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Size * 25),
-                    child: TextFieldContainer(
-                      child: TextField(
-                        controller: emailController,
-                        textInputAction: TextInputAction.next,
-                        style: TextStyle(color: Colors.white, fontSize: Size * 20),
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Email',
-                            hintStyle: TextStyle(
-                                color: Colors.white54, fontSize: Size * 20)),
-                      ),
-                    ),
-                  ),
-                  //password
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Size * 25),
-                    child: TextFieldContainer(
-                        child: TextField(
-                          obscureText: true,
-                          controller: passwordController,
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(color: Colors.white, fontSize: Size * 20),
-                          decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Password',
-                              hintStyle: TextStyle(
-                                  color: Colors.white54, fontSize: Size * 20)),
-                        )),
-                  ),
-
-                  //sign in button
-                  SizedBox(
-                    height: Size * 10,
-                  ),
-
-                  InkWell(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: Size * 20, vertical: Size * 10),
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                        borderRadius: BorderRadius.circular(Size * 10),
-                      ),
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                            fontSize: Size * 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ),
-                    onTap: signIn,
-                  ),
-
-                  SizedBox(
-                    height:Size *  20,
-                  ),
-                  InkWell(
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                          fontSize: Size * 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                    ),
-                    onTap: () async {
-                      if (emailController.text.length > 10) {
-                        final String email = emailController.text.trim();
-                        try {
-                          await _auth.sendPasswordResetEmail(email: email);
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Password Reset Email Sent'),
-                              content: Text(
-                                  'An email with instructions to reset your password has been sent to $email.'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } catch (error) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Error'),
-                              content: Text(error.toString()),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      } else {
-                        showToastText("Enter Gmail");
-                      }
-                    },
-                  ),
-
-                  SizedBox(
-                    height: Size * 20,
-                  ),
-                  Wrap(
-                    children: [
-                      Text(
-                        "Not a Member?",
-                        style: TextStyle(
-                            fontSize: Size * 20,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white),
-                      ),
-                      InkWell(
-                        child: Text(
-                          " Register Here",
-                          style: TextStyle(
-                              fontSize: Size * 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.cyan),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => createNewUser()));
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: Size * 20,
-                  ),
-                  InkWell(
-                    child: Text(
-                      "Report",
-                      style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.w600,
-                          fontSize: Size * 20),
-                    ),
-                    onTap: () {
-                      // sendingMails("sujithnimmala03@gmail.com");
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ));
-  }
-
-  Future signIn() async {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: CircularProgressIndicator(),
-        ));
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text.trim().toLowerCase(),
-          password: passwordController.text.trim());
-    } on FirebaseException catch (e) {
-      showToastText(e.message as String);
-
-    }
-    Navigator.pop(context);
-  }
-}
 
 class createNewUser extends StatefulWidget {
+  const createNewUser({super.key});
+
 
 
   @override
@@ -274,7 +44,7 @@ class _createNewUserState extends State<createNewUser> {
 
   String generateCode() {
     final Random random = Random();
-    const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+    const characters = '123456789abcdefghijklmnpqrstuvwxyz';
     String code = '';
 
     for (int i = 0; i < 6; i++) {
@@ -288,14 +58,11 @@ class _createNewUserState extends State<createNewUser> {
   Widget build(BuildContext context) {
     double Size = size(context);
     return backGroundImage(
+      text: "Enter Gmail ID",
       child: Column(
         children: [
-          backButton(
-            text: "Enter Gmail ID",
-          ),
-          SizedBox(
-            height: Size * 15,
-          ),
+
+
           TextFieldContainer(
               child: TextFormField(
                 controller: emailController,
@@ -327,21 +94,20 @@ class _createNewUserState extends State<createNewUser> {
                       )),
                 ),
               Padding(
-                padding:  EdgeInsets.symmetric(horizontal: Size * 20),
+                padding:  EdgeInsets.symmetric(horizontal: Size * 10),
                 child: InkWell(
                   child: Container(
+                    padding:  EdgeInsets.symmetric(
+                        vertical:Size *  5, horizontal:Size *  10),
                     decoration: BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.circular(Size * 10)),
-                    child: Padding(
-                      padding:  EdgeInsets.symmetric(
-                          vertical:Size *  5, horizontal:Size *  10),
-                      child: Text(
-                        isSend ? "Verity" : "Send OTP",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: Size * 30,
-                            fontWeight: FontWeight.w600),
+                        color: Colors.amber.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(Size * 30)),
+                    child: Text(
+                      isSend ? "Verity" : "Send OTP",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: Size * 25,
+                          fontWeight: FontWeight.w500
                       ),
                     ),
                   ),
@@ -361,14 +127,12 @@ class _createNewUserState extends State<createNewUser> {
                     }
                     else {
                       otp = generateCode();
-
-
                           showToastText("OTP is Sent to our Email");
                           FirebaseFirestore.instance
                               .collection("tempRegisters")
                               .doc(emailController.text)
                               .set({"email": emailController.text, "opt": otp});
-                          sendEmail("esrkr.app@gmail.com", otp);
+                          sendEmail(emailController.text, otp);
                         isSend = true;
                     }
 
@@ -488,9 +252,7 @@ class _createNewUserState extends State<createNewUser> {
                               .doc(emailController.text)
                               .set({
                             "id": emailController.text,
-                            "name": firstNameController.text +
-                                ";" +
-                                lastNameController.text,
+                            "name": "${firstNameController.text};${lastNameController.text}",
 
                           });
                           await FirebaseAuth.instance

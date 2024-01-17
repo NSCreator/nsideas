@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -58,7 +55,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBVb-_KOjpg7bc9CTsizb9eSJgIUrG3imY',
-    appId: '1:512397462005:android:cbf871945cce71ccaf78bc',
+    appId: '1:512397462005:android:54ebcd089ab07ceaaf78bc',
     messagingSenderId: '512397462005',
     projectId: 'prokoni',
     storageBucket: 'prokoni.appspot.com',
@@ -66,11 +63,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDsTSsLsw2kxVdQrmpV08-uBN7btkCF_tg',
-    appId: '1:512397462005:ios:14d879537cb33a0daf78bc',
+    appId: '1:512397462005:ios:5546854a07150889af78bc',
     messagingSenderId: '512397462005',
     projectId: 'prokoni',
     storageBucket: 'prokoni.appspot.com',
-    iosClientId: '512397462005-20r089tqeo6lvcg6n23ck3459imksh35.apps.googleusercontent.com',
-    iosBundleId: 'com.nimmalasujith.nsIdeas',
+    iosClientId: '512397462005-tklrcadqpnkogde79hejmaknq9p3rt8l.apps.googleusercontent.com',
+    iosBundleId: 'com.example.nsideas',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDsTSsLsw2kxVdQrmpV08-uBN7btkCF_tg',
+    appId: '1:512397462005:ios:61224eed5d4e8deaaf78bc',
+    messagingSenderId: '512397462005',
+    projectId: 'prokoni',
+    storageBucket: 'prokoni.appspot.com',
+    iosClientId: '512397462005-rd4uomj2qkc5ufcup5alj9f9rpggr070.apps.googleusercontent.com',
+    iosBundleId: 'com.example.nsideas.RunnerTests',
   );
 }

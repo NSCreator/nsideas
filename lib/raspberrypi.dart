@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:ns_ideas/authPage.dart';
 import 'package:ns_ideas/homepage.dart';
 import 'settings.dart';
-import 'textField.dart';
 import 'commonFunctions.dart';
 import 'functions.dart';
 import 'package:path_provider/path_provider.dart';
@@ -41,17 +40,18 @@ class _raspberrypiBoardsState extends State<raspberrypiBoards> {
   @override
   Widget build(BuildContext context) {
     double Size = size(context);
-    return SingleChildScrollView(
-
+    return backGroundImage(
+      text: "Board",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           Padding(
-            padding: EdgeInsets.only(left: Size*15,bottom: Size*15),
+            padding: EdgeInsets.only(left: Size*15,bottom: Size*10),
             child: Text(
               "Board",
               style: TextStyle(
-                  fontSize: Size*30,
+                  fontSize: Size*25,
                   fontWeight: FontWeight.w500,
                   color: Colors.white),
             ),
@@ -71,163 +71,126 @@ class _raspberrypiBoardsState extends State<raspberrypiBoards> {
                   if (snapshot.hasError) {
                     return const Text("Error with server");
                   } else {
-                    return SizedBox(
-                      height: Size*130,
-                      child: ListView.builder(
-                        itemCount: Subjects!.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (BuildContext context, int index) {
-                          final SubjectsData = Subjects[index];
-                          if (SubjectsData.photoUrl.split(";").first.length > 3) {
-                            final Uri uri = Uri.parse(SubjectsData.photoUrl.split(";").first);
-                            final String fileName = uri.pathSegments.last;
-                            var name = fileName.split("/").last;
-                            file = File("$folderPath/${SubjectsData.id}/$name");
+                    return ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemCount: Subjects!.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        final SubjectsData = Subjects[index];
+                        if (SubjectsData.photoUrl.split(";").first.length > 3) {
+                          final Uri uri = Uri.parse(SubjectsData.photoUrl.split(";").first);
+                          final String fileName = uri.pathSegments.last;
+                          var name = fileName.split("/").last;
+                          file = File("$folderPath/${SubjectsData.id}/$name");
 
-                          }
-                          return InkWell(
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding:  EdgeInsets.only(left: Size*15),
-                                  child: SizedBox(
-                                    height: Size*130,
-                                    child: AspectRatio(
-                                      aspectRatio: 16 / 9,
-                                      child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.black38,
-                                            borderRadius:
-                                                 BorderRadius.all(
-                                                    Radius.circular(Size*15)),
-                                            image: DecorationImage(
-                                              image: FileImage(file),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment.bottomLeft,
-                                            child: Padding(
-                                              padding:  EdgeInsets.all(Size*5.0),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black.withOpacity(0.6),
-                                                  borderRadius: BorderRadius.circular(Size*15),
-                                                ),
-                                                child: Padding(
-                                                  padding:  EdgeInsets.all(Size*8.0),
-                                                  child: Text(
-                                                    SubjectsData.name.split(";").last,
-                                                    style:  TextStyle(
-                                                      fontSize: Size*20.0,
-                                                      color: Colors.tealAccent,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )),
-                                    ),
+                        }
+                        return InkWell(
+                          child: Column(
+                            children: [
+                              AspectRatio(
+                                aspectRatio: 16 / 7,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: ImageShowAndDownload(
+                                    image: SubjectsData.photoUrl.split(";").first,
+                                    id: SubjectsData.id,
                                   ),
                                 ),
-                                if (Subjects.length - index == 1)
-                                  SizedBox(
-                                    width: Size*80,
-                                  )
-                              ],
-                            ),
-                            onTap: () {
-                              FirebaseFirestore.instance
-                                  .collection('raspberrypi')
-                                  .doc("raspberrypiBoard")
-                                  .collection("Boards")
-                                  .doc(SubjectsData
-                                  .id) // Replace "documentId" with the ID of the document you want to retrieve
-                                  .get()
-                                  .then((DocumentSnapshot snapshot) async {
-                                if (snapshot.exists) {
-                                  var data = snapshot.data();
-                                  if (data != null &&
-                                      data is Map<String, dynamic>) {
-                                    List<String> images = [];
-                                    if (SubjectsData.photoUrl.isNotEmpty) {
-                                      images = SubjectsData.photoUrl.split(";");
-                                    }
-                                    if (data['pinDiagram']
-                                        .toString()
-                                        .isNotEmpty) {
-                                      images.addAll(data['pinDiagram']
-                                          .toString()
-                                          .split(";"));
-                                    }
-
-                                    if (!kIsWeb) {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (context) =>
-                                            ImageDownloadScreen(
-                                              images: images,
-                                              id: data['id'],
-                                            ),
-                                      );
-                                    }
-
-                                    Navigator.push(
-                                      context,
-                                      PageRouteBuilder(
-                                        transitionDuration:
-                                        const Duration(milliseconds: 300),
-                                        pageBuilder: (context, animation,
-                                            secondaryAnimation) =>
-                                            raspberrypiBoard(
-                                              pinDiagram: data['pinDiagram'],
-                                              id: SubjectsData.id,
-                                              heading: SubjectsData.name,
-                                              description: data['description'],
-                                              photoUrl: SubjectsData.photoUrl,
-                                            ),
-                                        transitionsBuilder: (context, animation,
-                                            secondaryAnimation, child) {
-                                          final fadeTransition = FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                          );
-
-                                          return Container(
-                                            color: Colors.black
-                                                .withOpacity(animation.value),
-                                            child: AnimatedOpacity(
-                                                duration:
-                                                Duration(milliseconds: 300),
-                                                opacity: animation.value
-                                                    .clamp(0.3, 1.0),
-                                                child: fadeTransition),
-                                          );
-                                        },
-                                      ),
-                                    );
+                              ),
+                              Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Padding(
+                                  padding:  EdgeInsets.only(top:Size*2.0,bottom:Size*8.0),
+                                  child: Text(
+                                    SubjectsData.name.split(";").last,
+                                    style:  TextStyle(
+                                      fontSize: Size*20.0,
+                                      color: Colors.white,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          onTap: () {
+                            FirebaseFirestore.instance
+                                .collection('raspberrypi')
+                                .doc("raspberrypiBoard")
+                                .collection("Boards")
+                                .doc(SubjectsData
+                                .id) // Replace "documentId" with the ID of the document you want to retrieve
+                                .get()
+                                .then((DocumentSnapshot snapshot) async {
+                              if (snapshot.exists) {
+                                var data = snapshot.data();
+                                if (data != null &&
+                                    data is Map<String, dynamic>) {
+                                  List<String> images = [];
+                                  if (SubjectsData.photoUrl.isNotEmpty) {
+                                    images = SubjectsData.photoUrl.split(";");
                                   }
-                                } else {
-                                  print("Document does not exist.");
+                                  if (data['pinDiagram']
+                                      .toString()
+                                      .isNotEmpty) {
+                                    images.addAll(data['pinDiagram']
+                                        .toString()
+                                        .split(";"));
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      transitionDuration:
+                                      const Duration(milliseconds: 300),
+                                      pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
+                                          raspberrypiBoard(
+                                            pinDiagram: data['pinDiagram'],
+                                            id: SubjectsData.id,
+                                            heading: SubjectsData.name,
+                                            description: data['description'],
+                                            photoUrl: SubjectsData.photoUrl,
+                                          ),
+                                      transitionsBuilder: (context, animation,
+                                          secondaryAnimation, child) {
+                                        final fadeTransition = FadeTransition(
+                                          opacity: animation,
+                                          child: child,
+                                        );
+
+                                        return Container(
+                                          color: Colors.black
+                                              .withOpacity(animation.value),
+                                          child: AnimatedOpacity(
+                                              duration:
+                                              Duration(milliseconds: 300),
+                                              opacity: animation.value
+                                                  .clamp(0.3, 1.0),
+                                              child: fadeTransition),
+                                        );
+                                      },
+                                    ),
+                                  );
                                 }
-                              }).catchError((error) {
-                                print(
-                                    "An error occurred while retrieving data: $error");
-                              });
-                            },
-                          );
-                        },
-                      ),
+                              } else {
+                                print("Document does not exist.");
+                              }
+                            }).catchError((error) {
+                              print(
+                                  "An error occurred while retrieving data: $error");
+                            });
+                          },
+                        );
+                      },
                     );
                   }
               }
             },
           ),
           SizedBox(
-            height: Size*150,
+            height: Size*50,
           )
         ],
       ),
@@ -300,137 +263,19 @@ class _raspberrypiBoardState extends State<raspberrypiBoard> {
   Widget build(BuildContext context) {
     double Size = size(context);
     return backGroundImage(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            backButton(text: widget.heading,),
+      text: widget.heading,
+      child: Column(
+        children: [
+          imageHeadingTagsDescription(heading: widget.heading.split(";").last, id: widget.id, description: "              ${widget.description}", photoUrl: widget.photoUrl, tags: const []),
+
+          Description(c0: 'raspberrypi',d0: "raspberrypiBoard",c1: "Boards",d1:widget.id, typeOfProject: 'raspberrypiBoard',),
+          if (widget.pinDiagram.isNotEmpty)
             Padding(
-              padding:  EdgeInsets.all(Size*4.0),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(Size*15),
-                  border: Border.all(color: Colors.white24)
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.photoUrl.isNotEmpty)
-                      Padding(
-                        padding:  EdgeInsets.all(Size*5.0),
-                        child: InkWell(
-                          child:  scrollingImages(images: widget.photoUrl.split(";"),id: widget.id),
-                          onTap: () {
-                            showToastText(longPressToViewImage);
-                          },
-                          onLongPress: () {
-                            if (widget.photoUrl.length > 3) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          zoom(
-                                              typeOfProject: 'raspberrypiBoard',
-                                              url: widget
-                                                  .photoUrl)));
-                            } else {
-                              showToastText(noImageUrl);
-                            }
-                          },
-                        ),
-                      ),
-                    Padding(
-                      padding:  EdgeInsets.all(Size*8.0),
-                      child: Text(
-                        widget.heading.split(";").last,
-                        style: TextStyle(
-                            fontSize: Size*20,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
-                      ),
-                    ),
-
-                    Container(
-                      height: Size*1,
-                      width: double.infinity,
-                      color: Colors.white24,
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                         Padding(
-                          padding: EdgeInsets.only(
-                              left: Size*8,
-                              right:Size* 8,
-                              top: Size*10,
-                              bottom: Size*3),
-                          child: Text(
-                            "Description",
-                            style: TextStyle(
-                                fontSize: Size*25,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        Container(
-                          height: Size*3,
-                          width: Size*60,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(Size*15),
-                          ),
-                        ),
-                        Padding(
-                          padding:  EdgeInsets.only(
-                              left: Size*10,
-                              right: Size*10,
-                              bottom: Size*15,
-                              top:Size* 13),
-                          child: Text(
-                            "              ${widget.description}",
-                            style:  TextStyle(
-                                fontSize: Size*16,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              padding:  EdgeInsets.all(Size*5.0),
+              child: scrollingImages(images: widget.pinDiagram.split(";"),  id: widget.id,isZoom: true,),
             ),
-
-            Description(c0: 'raspberrypi',d0: "raspberrypiBoard",c1: "Boards",d1:widget.id, typeOfProject: 'raspberrypiBoard',),
-            if (widget.pinDiagram.isNotEmpty)
-              Padding(
-                padding:  EdgeInsets.all(Size*5.0),
-                child: InkWell(
-                  child:  scrollingImages(images: widget.pinDiagram.split(";"),  id: widget.id),
-                  onTap: () {
-                    showToastText(longPressToViewImage);
-                  },
-                  onLongPress: () {
-                    if (widget.pinDiagram.length > 3) {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  zoom(
-                                      typeOfProject: 'raspberrypiBoard',
-                                      url: widget
-                                          .pinDiagram)));
-                    } else {
-                      showToastText(noImageUrl);
-                    }
-                  },
-                ),
-              ),
-            Center(child: Text("--${widget.heading}--")),
-          ],
-        ),
+          Center(child: Text("--${widget.heading}--")),
+        ],
       ),
     );
   }

@@ -14,31 +14,34 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+#  google_mobile_ads:
+  cupertino_icons:
+  firebase_database:
+  firebase_core:
+  cloud_firestore:
+  firebase_auth:
+#  google_sign_in:
+#  firebase_auth_oauth:
 
-
-  cupertino_icons: ^1.0.2
-  firebase_database: ^10.2.0
-  firebase_core: ^2.14.0
-  cloud_firestore: ^4.7.0
-  carousel_slider: ^4.2.1
-  url_launcher: ^6.1.11
-  youtube_player_flutter: ^8.1.2
-  fluttertoast: ^8.2.1
-  email_validator: ^2.1.17
-  firebase_auth: ^4.6.0
+  carousel_slider:
+  url_launcher:
+  youtube_player_flutter:
+  fluttertoast:
+  email_validator:
   youtube_api:
   youtube_explode_dart:
-  photo_view: ^0.14.0
-  cached_network_image: ^3.2.3
-  webview_flutter: ^4.2.0
-  intl: ^0.18.1
-  flutter_staggered_animations: ^1.1.1
-  flutter_local_notifications: ^15.1.1
-  firebase_messaging: ^14.6.1
-  marquee: ^2.2.3
-  visibility_detector: ^0.4.0+2
-  mailer: ^6.0.1
-  flutter_launcher_icons: ^0.13.1
+  photo_view:
+  cached_network_image:
+  webview_flutter:
+  intl:
+  flutter_staggered_animations:
+  flutter_local_notifications:
+  firebase_messaging:
+  marquee:
+  visibility_detector:
+  mailer:
+  flutter_launcher_icons:
+  flutter_inappwebview:
 
 dev_dependencies:
   flutter_test:
@@ -56,7 +59,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-
+    - lib/images/
   # fonts:
   #   - family: Schyler
   #     fonts:

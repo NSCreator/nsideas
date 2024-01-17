@@ -4,12 +4,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:ns_ideas/authPage.dart';
+import 'package:ns_ideas/homepage.dart';
 import 'package:photo_view/photo_view.dart';
-import 'homepage.dart';
 import 'settings.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'functions.dart';
@@ -19,12 +19,11 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class commentsPage extends StatefulWidget {
-final int comments;
   final String c0;
   final String d0;
   final String c1;
   final String d1;
-  const commentsPage({required this.c0,required this.d0,required this.c1,required this.d1,required this.comments});
+  const commentsPage({super.key, required this.c0,required this.d0,required this.c1,required this.d1});
 
 
   @override
@@ -33,208 +32,222 @@ final int comments;
 
 class _commentsPageState extends State<commentsPage> {
    TextEditingController comment = TextEditingController();
+   Future<List<CommentsConvertor>> fetchComments() async {
+     try {
+       final data = await readComments(widget.c0, widget.d0, widget.c1, widget.d1).first;
+       return data;
+     } catch (error) {
+       throw error;
+     }
+   }
+
   @override
   Widget build(BuildContext context) {
     double Size = size(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Padding(
-          padding:  EdgeInsets.symmetric(vertical:Size* 8,horizontal:Size* 20),
-          child: Row(
-            children: [
-              Flexible(
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white30,
-                      borderRadius: BorderRadius.circular(Size*20)),
-                  child: Padding(
-                    padding:  EdgeInsets.only(left: Size*10),
-                    child: TextFormField(
-                      controller: comment,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.multiline,
-                      style:
-                      TextStyle(color: Colors.white, fontSize:Size* 20),
-                      maxLines: null,
-                      // Allows the field to expand as needed
-                      decoration: const InputDecoration(
-                        hintStyle: TextStyle(
-                          color: Colors.white60,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding:  EdgeInsets.symmetric(vertical:Size* 8,horizontal:Size* 8),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(Size*20)),
+                    child: Padding(
+                      padding:  EdgeInsets.only(left: Size*10),
+                      child: TextFormField(
+                        controller: comment,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.multiline,
+                        style:
+                        TextStyle(color: Colors.white, fontSize:Size* 16),
+                        maxLines: null,
+                        // Allows the field to expand as needed
+                        decoration: const InputDecoration(
+                          hintStyle: TextStyle(
+                            color: Colors.white60,
+                          ),
+                          border: InputBorder.none,
+                          hintText: 'Add a comment...',
                         ),
-                        border: InputBorder.none,
-                        hintText: 'Add a comment...',
                       ),
                     ),
                   ),
                 ),
-              ),
-              InkWell(
-                child: Padding(
-                  padding:  EdgeInsets.all(Size*5.0),
-                  child: Icon(
-                    Icons.send,
-                    color: Colors.lightBlueAccent,
-                  ),
-                ),
-                onTap: () async {
-                  String id = getID();
+                InkWell(
+                    child: Padding(
+                      padding:  EdgeInsets.all(Size*5.0),
+                      child: Icon(
+                        Icons.send,
+                        color: Colors.lightBlueAccent,
+                        size: 30,
+                      ),
+                    ),
+                    onTap: () async {
+                      String id = getID();
 
-                 await FirebaseFirestore.instance
-                      .collection("user")
-                      .doc(fullUserId())
-                      .get()
-                      .then((DocumentSnapshot snapshot) async {
-                    if (snapshot.exists) {
-                      var data = snapshot.data();
-                      if (data != null &&
-                          data is Map<String, dynamic>) {
-
-
-                        String name = data['name'].toString().split(";").first[0]??"";
-                         name =name+ data['name'].toString().split(";").last[0]??"";
-                         name="$name:"+fullUserId();
-                         name ="$name;${comment.text.trim()}";
-                         showToastText(comment.text);
-                        widget.c1.isNotEmpty && widget.d1.isNotEmpty
-                            ? await FirebaseFirestore.instance
-                            .collection(widget.c0)
-                            .doc(widget.d0)
-                            .collection(widget.c1)
-                            .doc(widget.d1)
-                            .collection("comments")
-                            .doc(id)
-                            .set({
-                          "id": id,
-                          "data": name,
-                          "reply":[],
-                          "likedBy":[]
-                        })
-                            :await FirebaseFirestore.instance
-                            .collection(widget.c0)
-                            .doc(widget.d0)
-                            .collection("comments")
-                            .doc(id)
-                            .set({
-                          "id": id,
-                          "data": name,
-                          "reply":[],
-                          "likedBy":[]
-                        });
-
-                        widget.c1.isNotEmpty && widget.d1.isNotEmpty
-                            ? await FirebaseFirestore.instance
-                            .collection(widget.c0)
-                            .doc(widget.d0)
-                            .collection(widget.c1)
-                            .doc(widget.d1)
-
-                            .update({
-                          "comments": widget.comments+1,
-
-                        })
-                            :await FirebaseFirestore.instance
-                            .collection(widget.c0)
-                            .doc(widget.d0)
-
-                            .update({
-                          "comments": widget.comments+1,
-
-                        });
-
-                      }
-                    } else {
-                      print("Document does not exist.");
+                      await FirebaseFirestore.instance
+                          .collection("user")
+                          .doc(fullUserId())
+                          .get()
+                          .then((DocumentSnapshot snapshot) async {
+                        if (snapshot.exists) {
+                          var data = snapshot.data();
+                          if (data != null &&
+                              data is Map<String, dynamic>) {
+                            String name = data['name'].toString().split(";").first[0]??"";
+                            name =name+ data['name'].toString().split(";").last[0]??"";
+                            name="$name:"+fullUserId();
+                            name ="$name;${comment.text.trim()}";
+                            showToastText(comment.text);
+                            widget.c1.isNotEmpty && widget.d1.isNotEmpty
+                                ? await FirebaseFirestore.instance
+                                .collection(widget.c0)
+                                .doc(widget.d0)
+                                .collection(widget.c1)
+                                .doc(widget.d1)
+                                .collection("comments")
+                                .doc(id)
+                                .set({
+                              "id": id,
+                              "data": name,
+                              "reply":[],
+                              "likedBy":[]
+                            })
+                                :await FirebaseFirestore.instance
+                                .collection(widget.c0)
+                                .doc(widget.d0)
+                                .collection("comments")
+                                .doc(id)
+                                .set({
+                              "id": id,
+                              "data": name,
+                              "reply":[],
+                              "likedBy":[]
+                            });
+                          }
+                        } else {
+                          print("Document does not exist.");
+                        }
+                      }).catchError((error) {
+                        print(
+                            "An error occurred while retrieving data: $error");
+                      });
+                      comment.clear();
+                      setState(() {});
                     }
-                  }).catchError((error) {
-                    print(
-                        "An error occurred while retrieving data: $error");
-                  });
-
-                    comment.clear();
-                  }
-
-
-              )
-            ],
+                )
+              ],
+            ),
           ),
-        ),
-        StreamBuilder<List<CommentsConvertor>>(
-          stream: readComments(widget.c0,widget.d0,widget.c1,widget.d1),
-          builder: (context, snapshot) {
-            final Subjects = snapshot.data;
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 0.3,
-                      color: Colors.cyan,
-                    ));
-              default:
-                if (snapshot.hasError) {
-                  return const Text("Error with server");
-                } else {
-                  return ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: Subjects!.length,
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      final SubjectsData = Subjects[index];
+          FutureBuilder<List<CommentsConvertor>>(
+            future: fetchComments(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 0.3,
+                    color: Colors.cyan,
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Text("Error with server");
+              } else {
+                final Subjects = snapshot.data;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(Size * 8.0),
+                      child: Text(
+                        "Comments ${Subjects!.length}",
+                        style: TextStyle(
+                          fontSize: Size * 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: Subjects.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        final SubjectsData = Subjects[index];
 
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-
-                          Padding(
-                            padding:  EdgeInsets.all(Size*8.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(color: Colors.white12,
-                                  borderRadius: BorderRadius.circular(Size*20)),
-                                  child: Padding(
-                                    padding:  EdgeInsets.all(Size*5),
-                                    child: Text(SubjectsData.data.split(":").first.toUpperCase(),style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.bold),),
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(Size * 8.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white12,
+                                      borderRadius: BorderRadius.circular(Size * 20),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: Size * 5, horizontal: Size * 6),
+                                      child: Text(
+                                        SubjectsData.data.split(":").first.toUpperCase(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: Size * 20,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding:  EdgeInsets.only(left: Size*5),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                          Text("@${SubjectsData.data.split(";").first.split(":").last}",style: TextStyle(color: Colors.white54,fontSize:Size* 15)),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: Size * 5),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "@${SubjectsData.data.split(";").first.split(":").last.split("@").first}",
+                                            style: TextStyle(
+                                              color: Colors.white60,
+                                              fontSize: Size * 12,
+                                            ),
+                                          ),
                                           StyledTextWidget(
-                                              text: SubjectsData.data.split(";").last,
-                                              fontSize: Size*22,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500),
-                                          if(SubjectsData.reply.isNotEmpty)ListView.builder(
+                                            text: SubjectsData.data.split(";").last,
+                                            fontSize: Size * 20,
+                                            color: Colors.white,
+                                          ),
+                                          if (SubjectsData.reply.isNotEmpty)
+                                            ListView.builder(
                                               physics:
                                               const NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
                                               itemCount: SubjectsData.reply.length,
-                                              itemBuilder: (BuildContext context,
-                                                  int index) {
+                                              itemBuilder: (BuildContext context, int index) {
                                                 return StyledTextWidget(
-                                                    text: SubjectsData.reply[
-                                                    index],
-                                                    color: Colors
-                                                        .white70,
-                                                    fontSize:
-                                                    Size*18);
-                                              }),
-                                      ],
+                                                  text: SubjectsData.reply[index],
+                                                  color: Colors.white70,
+                                                  fontSize: Size * 18,
+                                                );
+                                              },
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if(fullUserId()==SubjectsData.data.split(";").first.split(":").last||fullUserId()=="sujithnimmala03@gmail.com")InkWell(
+                                  if(fullUserId()==SubjectsData.data.split(";").first.split(":").last||fullUserId()=="sujithnimmala03@gmail.com")
+                                  InkWell(
                                     child: Padding(
-                                      padding:  EdgeInsets.all(Size*5.0),
+                                      padding: EdgeInsets.all(Size * 5.0),
                                       child: Icon(
                                         Icons.delete,
                                         color: Colors.amberAccent,
@@ -247,18 +260,14 @@ class _commentsPageState extends State<commentsPage> {
                                           .doc(widget.d0)
                                           .collection(widget.c1)
                                           .doc(widget.d1)
-
                                           .update({
-                                        "comments": Subjects.length-1,
-
+                                        "comments": Subjects.length - 1,
                                       })
-                                          :await FirebaseFirestore.instance
+                                          : await FirebaseFirestore.instance
                                           .collection(widget.c0)
                                           .doc(widget.d0)
-
                                           .update({
-                                        "comments": Subjects.length-1,
-
+                                        "comments": Subjects.length - 1,
                                       });
                                       widget.c1.isNotEmpty && widget.d1.isNotEmpty
                                           ? FirebaseFirestore.instance
@@ -267,221 +276,191 @@ class _commentsPageState extends State<commentsPage> {
                                           .collection(widget.c1)
                                           .doc(widget.d1)
                                           .collection("comments")
-                                          .doc(SubjectsData.id).delete()
+                                          .doc(SubjectsData.id)
+                                          .delete()
                                           : FirebaseFirestore.instance
                                           .collection(widget.c0)
                                           .doc(widget.d0)
                                           .collection("comments")
-                                          .doc(SubjectsData.id).delete();
+                                          .doc(SubjectsData.id)
+                                          .delete();
+                                      setState(() {
 
-
-                                    }
-
-
-
-                                )
-                              ],
+                                      });
+                                    },
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-
-
-                        ],
-                      );
-                    },
-                    separatorBuilder: (context, index) =>
-                        SizedBox(
-                          height: Size*15,
-                        ),
-                  );
-                }
-            }
-          },
-        ),
-        SizedBox(height: Size*150),
-      ],
-    );
-  }
-}
-
-
-class ImageDownloadScreen extends StatefulWidget {
-  List<String> images;
-  String id;
-
-
-  ImageDownloadScreen(
-      {Key? key,required this.images,required this.id})
-      : super(key: key);
-  @override
-  _ImageDownloadScreenState createState() => _ImageDownloadScreenState();
-}
-
-class _ImageDownloadScreenState extends State<ImageDownloadScreen> {
-
-
-  int totalImages = 0;
-  int downloadedImages = 0;
-  double overallProgress = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _downloadImages();
-  }
-
-  _downloadImages() async {
-    totalImages = widget.images.length;
-    downloadedImages = 0;
-    overallProgress = 0.0;
-
-    // Create a directory to save the downloaded images
-    final Directory appDir = await getApplicationDocumentsDirectory();
-    final String imagesDirPath = '${appDir.path}/${widget.id}';
-    await Directory(imagesDirPath).create(recursive: true);
-
-    for (String url in widget.images) {
-      final Uri uri = Uri.parse(url);
-      final String filename = uri.pathSegments.last;
-      final File file = File('$imagesDirPath/$filename');
-      if(file.existsSync()){
-        downloadedImages++;
-      }
-      else {
-        try {
-        final http.Response response = await http.get(uri);
-        await file.writeAsBytes(response.bodyBytes);
-        downloadedImages++;
-      } catch (e) {
-        print('Error downloading image: $e');
-      }
-      }
-
-      setState(() {
-        overallProgress = downloadedImages / totalImages;
-      });
-
-      await Future.delayed(Duration(milliseconds: 100));
-    }
-
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double Size = size(context);
-    return AlertDialog(
-      backgroundColor: Colors.transparent,
-      content: Container(
-        padding: EdgeInsets.all(Size*10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Size*15),
-          border: Border.all(color: Colors.white30),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Just A Movement',style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.w600),),
-            SizedBox(height:Size* 8,),
-            Text('...loading image $downloadedImages of $totalImages',style: TextStyle(color: Colors.white,fontSize: Size*18),),
-            LinearProgressIndicator(
-              // value: overallProgress,
-            ),
-          ],
-        ),
+                          ],
+                        );
+                      },
+                      separatorBuilder: (context, index) => SizedBox(
+                        height: Size * 15,
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          )
+          // StreamBuilder<List<CommentsConvertor>>(
+          //   stream: readComments(widget.c0,widget.d0,widget.c1,widget.d1),
+          //   builder: (context, snapshot) {
+          //     final Subjects = snapshot.data;
+          //     switch (snapshot.connectionState) {
+          //       case ConnectionState.waiting:
+          //         return const Center(
+          //             child: CircularProgressIndicator(
+          //               strokeWidth: 0.3,
+          //               color: Colors.cyan,
+          //             ));
+          //       default:
+          //         if (snapshot.hasError) {
+          //           return const Text("Error with server");
+          //         } else {
+          //           return Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             mainAxisAlignment: MainAxisAlignment.start,
+          //             children: [
+          //               Padding(
+          //                 padding: EdgeInsets.all(Size*8.0),
+          //                 child: Text(
+          //                   "Comments ${Subjects!.length}",
+          //                   style: TextStyle(
+          //                       fontSize: Size*20,
+          //                       color: Colors.white),
+          //                 ),
+          //               ),
+          //               ListView.separated(
+          //                 physics: const NeverScrollableScrollPhysics(),
+          //                 itemCount: Subjects.length,
+          //                 shrinkWrap: true,
+          //                 itemBuilder: (BuildContext context, int index) {
+          //                   final SubjectsData = Subjects[index];
+          //
+          //                   return Column(
+          //                     mainAxisAlignment: MainAxisAlignment.start,
+          //                     crossAxisAlignment:
+          //                     CrossAxisAlignment.start,
+          //                     children: [
+          //                       Padding(
+          //                         padding:  EdgeInsets.all(Size*8.0),
+          //                         child: Row(
+          //                           children: [
+          //                             Container(
+          //                               decoration: BoxDecoration(color: Colors.white12,
+          //                               borderRadius: BorderRadius.circular(Size*20)),
+          //                               child: Padding(
+          //                                 padding:  EdgeInsets.symmetric(vertical:Size*5,horizontal: Size*6),
+          //                                 child: Text(SubjectsData.data.split(":").first.toUpperCase(),style: TextStyle(color: Colors.white,fontSize: Size*20,fontWeight: FontWeight.w500),),
+          //                               ),
+          //                             ),
+          //                             Expanded(
+          //                               child: Padding(
+          //                                 padding:  EdgeInsets.only(left: Size*5),
+          //                                 child: Column(
+          //                                   mainAxisAlignment: MainAxisAlignment.start,
+          //                                   crossAxisAlignment: CrossAxisAlignment.start,
+          //                                   children: [
+          //                                       Text("@${SubjectsData.data.split(";").first.split(":").last.split("@").first}",style: TextStyle(color: Colors.white60,fontSize:Size* 12)),
+          //                                       StyledTextWidget(
+          //                                           text: SubjectsData.data.split(";").last,
+          //                                           fontSize: Size*20,
+          //                                           color: Colors.white,),
+          //                                       if(SubjectsData.reply.isNotEmpty)ListView.builder(
+          //                                           physics:
+          //                                           const NeverScrollableScrollPhysics(),
+          //                                           shrinkWrap: true,
+          //                                           itemCount: SubjectsData.reply.length,
+          //                                           itemBuilder: (BuildContext context,
+          //                                               int index) {
+          //                                             return StyledTextWidget(
+          //                                                 text: SubjectsData.reply[
+          //                                                 index],
+          //                                                 color: Colors
+          //                                                     .white70,
+          //                                                 fontSize:
+          //                                                 Size*18);
+          //                                           }),
+          //                                   ],
+          //                                 ),
+          //                               ),
+          //                             ),
+          //                             // if(fullUserId()==SubjectsData.data.split(";").first.split(":").last||fullUserId()=="sujithnimmala03@gmail.com")
+          //                               InkWell(
+          //                                 child: Padding(
+          //                                   padding:  EdgeInsets.all(Size*5.0),
+          //                                   child: Icon(
+          //                                     Icons.delete,
+          //                                     color: Colors.amberAccent,
+          //                                   ),
+          //                                 ),
+          //                                 onTap: () async {
+          //                                   widget.c1.isNotEmpty && widget.d1.isNotEmpty
+          //                                       ? await FirebaseFirestore.instance
+          //                                       .collection(widget.c0)
+          //                                       .doc(widget.d0)
+          //                                       .collection(widget.c1)
+          //                                       .doc(widget.d1)
+          //
+          //                                       .update({
+          //                                     "comments": Subjects.length-1,
+          //
+          //                                   })
+          //                                       :await FirebaseFirestore.instance
+          //                                       .collection(widget.c0)
+          //                                       .doc(widget.d0)
+          //
+          //                                       .update({
+          //                                     "comments": Subjects.length-1,
+          //
+          //                                   });
+          //                                   widget.c1.isNotEmpty && widget.d1.isNotEmpty
+          //                                       ? FirebaseFirestore.instance
+          //                                       .collection(widget.c0)
+          //                                       .doc(widget.d0)
+          //                                       .collection(widget.c1)
+          //                                       .doc(widget.d1)
+          //                                       .collection("comments")
+          //                                       .doc(SubjectsData.id).delete()
+          //                                       : FirebaseFirestore.instance
+          //                                       .collection(widget.c0)
+          //                                       .doc(widget.d0)
+          //                                       .collection("comments")
+          //                                       .doc(SubjectsData.id).delete();
+          //
+          //
+          //                                 }
+          //
+          //
+          //
+          //                             )
+          //                           ],
+          //                         ),
+          //                       ),
+          //
+          //
+          //                     ],
+          //                   );
+          //                 },
+          //                 separatorBuilder: (context, index) =>
+          //                     SizedBox(
+          //                       height: Size*15,
+          //                     ),
+          //               ),
+          //             ],
+          //           );
+          //         }
+          //     }
+          //   },
+          // ),
+        ],
       ),
     );
   }
 }
 
-class ImageDownloadsScreen extends StatefulWidget {
-  List<String> images;
-  ImageDownloadsScreen(
-      {Key? key,required this.images})
-      : super(key: key);
-  @override
-  _ImageDownloadsScreenState createState() => _ImageDownloadsScreenState();
-}
-
-class _ImageDownloadsScreenState extends State<ImageDownloadsScreen> {
-
-
-  int totalImages = 0;
-  int downloadedImages = 0;
-  double overallProgress = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _downloadImages();
-  }
-
-  _downloadImages() async {
-    totalImages = widget.images.length;
-    downloadedImages = 0;
-    overallProgress = 0.0;
-
-
-
-    for (String url in widget.images) {
-      final Uri uri = Uri.parse(url.split(";").first);
-      final String fileName = uri.pathSegments.last;
-      var name = fileName.split("/").last;
-      if (url.startsWith('https://drive.google.com')) {
-        name = url.split(";").first.split('/d/')[1].split('/')[0];
-
-        url = "https://drive.google.com/uc?export=download&id=$name";
-      }
-      final response = await http.get(Uri.parse(url.split(";").first));
-      final documentDirectory = await getApplicationDocumentsDirectory();
-      final newDirectory =
-      Directory('${documentDirectory.path}/${url.split(";").last}');
-      if (!await newDirectory.exists()) {
-        await newDirectory.create(recursive: true);
-      }
-      final file = File('${newDirectory.path}/${name.split(";").first}');
-      await file.writeAsBytes(response.bodyBytes);
-
-      setState(() {
-        downloadedImages++;
-        overallProgress = downloadedImages / totalImages;
-      });
-
-      await Future.delayed(Duration(milliseconds: 100));
-    }
-
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double Size = size(context);
-    return AlertDialog(
-      backgroundColor: Colors.transparent,
-      content: Container(
-        padding: EdgeInsets.all(Size*10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Size*15),
-          border: Border.all(color: Colors.white30),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Just A Movement',style: TextStyle(color: Colors.white,fontSize: Size*25,fontWeight: FontWeight.w600),),
-            SizedBox(height:Size* 8,),
-            Text('...loading image $downloadedImages of $totalImages',style: TextStyle(color: Colors.white,fontSize: Size*18),),
-            LinearProgressIndicator(
-              // value: overallProgress,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 
 class Description extends StatefulWidget {
@@ -491,7 +470,7 @@ class Description extends StatefulWidget {
   final String d0;
   final String c1;
   final String d1;
-  const Description({required this.c0,required this.d0,required this.c1,required this.d1,required this.typeOfProject});
+  const Description({super.key, required this.c0,required this.d0,required this.c1,required this.d1,required this.typeOfProject});
 
   @override
   State<Description> createState() => _DescriptionState();
@@ -501,449 +480,512 @@ class _DescriptionState extends State<Description> {
   @override
   Widget build(BuildContext context) {
 double Size = size(context);
-    return StreamBuilder<List<DescriptionConvertor>>(
-      stream: readAllDescription(widget.c0,widget.d0,widget.c1,widget.d1),
-      builder: (context, snapshot) {
-        final Subjects = snapshot.data;
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 0.3,
-                  color: Colors.cyan,
-                ));
-          default:
-            if (snapshot.hasError) {
-              return const Text("Error with server");
-            } else {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+return FutureBuilder<List<DescriptionConvertor>>(
+  future: readAllDescription(widget.c0, widget.d0, widget.c1, widget.d1),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 0.3,
+          color: Colors.cyan,
+        ),
+      );
+    } else if (snapshot.hasError) {
+      return Text("Error with server");
+    } else {
+      final Subjects = snapshot.data;
+      return Container(
+        margin: EdgeInsets.all(4),
+        padding: EdgeInsets.all(4),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white.withOpacity(0.08)
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            Padding(
+              padding:  EdgeInsets.symmetric(horizontal: Size*8,vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
-                  if(isUser()) Padding(
-                    padding:  EdgeInsets.symmetric(horizontal: Size*20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Text("Description",style: TextStyle(color: Colors.white70,fontSize: Size*20,fontWeight: FontWeight.w600),),
-                         InkWell(
-                           child:  Container(
-                             decoration: BoxDecoration(
-                               color: Colors.greenAccent,
-                               borderRadius:
-                               BorderRadius.circular(Size*15),
-                             ),
-                             child: Padding(
-                               padding:  EdgeInsets.all(Size*5.0),
-                               child: Text(" ADD "),
-                             ),
-                           ),
-                           onTap: (){
-                             Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(c0: widget.c0,d0:widget.d0,c1:widget.c1,d1:widget.d1)));
-                           },
-                         ),
-                       ],
-                     ),
+                  Text("Project Description",style: TextStyle(color: Colors.white,fontSize: Size*20),),
+                  if(isUser())InkWell(
+                    child:  Container(
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent,
+                        borderRadius:
+                        BorderRadius.circular(Size*15),
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.all(Size*5.0),
+                        child: Text(" ADD "),
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(c0: widget.c0,d0:widget.d0,c1:widget.c1,d1:widget.d1)));
+                    },
                   ),
+                ],
+              ),
+            ),
 
-                  ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: Subjects!.length,
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      final SubjectsData = Subjects[index];
-                      List<String> newList = [];
-                      newList = SubjectsData.subData.split(";");
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          if(isUser())Row(
-                            children: [
-                              Text("Id : ${SubjectsData.id}",style: TextStyle(color: Colors.white),),
-                              Spacer(),
-                              InkWell(
-                                child: Padding(
-                                  padding:  EdgeInsets.symmetric(horizontal: Size*10),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.lightBlueAccent,
-                                      borderRadius:
-                                      BorderRadius.circular(Size*15),
-                                    ),
-                                    child: Padding(
-                                      padding:  EdgeInsets.all(Size*5.0),
-                                      child: Text(" Edit "),
-                                    ),
-                                  ),
-                                ),
-                                onTap: (){
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(data:SubjectsData.data ,subData: SubjectsData.subData,table: SubjectsData.table,images: SubjectsData.images,d2: SubjectsData.id, c0: widget.c0,d0: widget.d0,c1: widget.c1,d1:widget.d1,files: SubjectsData.files,)));
-                                },
+            ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: Subjects!.length,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) {
+                final SubjectsData = Subjects[index];
+                List<String> newList = [];
+                newList = SubjectsData.subData.split(";");
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    if(isUser())Row(
+                      children: [
+                        Text("Id : ${SubjectsData.id}",style: TextStyle(color: Colors.white),),
+                        Spacer(),
+                        InkWell(
+                          child: Padding(
+                            padding:  EdgeInsets.symmetric(horizontal: Size*10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.lightBlueAccent,
+                                borderRadius:
+                                BorderRadius.circular(Size*15),
                               ),
-                              InkWell(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.redAccent,
-                                    borderRadius:
-                                    BorderRadius.circular(Size*15),
-                                  ),
-                                  child: Padding(
-                                    padding:  EdgeInsets.all(Size*5.0),
-                                    child: Text(" Delete "),
-                                  ),
-                                ),
-                                onTap: (){
-                                  widget.c1.isNotEmpty&&widget.d1.isNotEmpty?FirebaseFirestore.instance.collection(widget.c0).doc(widget.d0).collection(widget.c1).doc(widget.d1).collection("description").doc(SubjectsData.id).delete():FirebaseFirestore.instance.collection(widget.c0).doc(widget.d0).collection("description").doc(SubjectsData.id).delete();
-                                },
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding:  EdgeInsets.all(Size*8.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (newList.length > 1)
-                                  StyledTextWidget(
-                                      text: SubjectsData.data,
-                                      fontSize: Size*22,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600)
-                                else if (SubjectsData.images.isNotEmpty)
-                                  StyledTextWidget(
-                                      text: SubjectsData.data,
-                                      fontSize: Size*22,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500)
-                                else
-                                  StyledTextWidget(
-                                      text: "       ${SubjectsData.data}",
-                                      fontSize: Size*20,
-                                      color:
-                                      Colors.white.withOpacity(0.9),
-                                      fontWeight: FontWeight.w400),
-                                if (SubjectsData.images.isNotEmpty)
-                                  Padding(
-                                    padding:
-                                     EdgeInsets.only(top:Size* 20),
-                                    child: scrollingImages(
-                                      images: SubjectsData.images
-                                          .split(";"),  id: widget.d1,),
-                                  ),
-                                if (SubjectsData.subData.isNotEmpty)
-                                  ListView.builder(
-                                      physics:
-                                      const NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemCount: newList.length,
-                                      itemBuilder: (BuildContext context,
-                                          int index) {
-                                        if (newList.length > 1) {
-                                          return Padding(
-                                            padding:
-                                             EdgeInsets.all(Size*8.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment
-                                                  .start,
-                                              children: [
-                                                Text(
-                                                  "${index + 1}. ",
-                                                  style:  TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: Size*20),
-                                                ),
-                                                Expanded(
-                                                    child:
-                                                    StyledTextWidget(
-                                                        text: newList[
-                                                        index],
-                                                        color: Colors
-                                                            .white70,
-                                                        fontSize:
-                                                        Size*18)),
-                                              ],
-                                            ),
-                                          );
-                                        } else {
-                                          return Center(
-                                            child: Padding(
-                                                padding:
-                                                 EdgeInsets.all(
-                                                    Size*8.0),
-                                                child: StyledTextWidget(
-                                                    text: newList[index],
-                                                    color: Colors
-                                                        .amberAccent,
-                                                    fontSize: Size*16)),
-                                          );
-                                        }
-                                      }),
-                              ],
-                            ),
-                          ),
-                          if (SubjectsData.table.isNotEmpty)
-                            Padding(
-                              padding:  EdgeInsets.symmetric(
-                                  horizontal:Size* 8, vertical:Size* 10),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics:
-                                NeverScrollableScrollPhysics(),
-                                itemCount: SubjectsData.table
-                                    .split(";")
-                                    .length +
-                                    1, // Number of rows including the header
-                                itemBuilder: (context, index) {
-                                  if (index == 0) {
-                                    return Table(
-                                      border: TableBorder.all(
-                                          width:Size* 0.8,
-                                          color: Colors.white70,
-                                          borderRadius:
-                                          BorderRadius.only(
-                                              topRight: Radius
-                                                  .circular(Size*10),
-                                              topLeft: Radius
-                                                  .circular(
-                                                  Size* 10))),
-                                      defaultVerticalAlignment:
-                                      TableCellVerticalAlignment
-                                          .middle,
-                                      columnWidths: {
-                                        0: FractionColumnWidth(0.2),
-                                        1: FractionColumnWidth(0.5),
-                                      },
-                                      children: [
-                                        TableRow(
-                                          decoration: BoxDecoration(
-                                              color: Colors.grey
-                                                  .withOpacity(
-                                                  0.3),
-                                              borderRadius:
-                                              BorderRadius.only(
-                                                  topRight: Radius
-                                                      .circular(Size*10),
-                                                  topLeft: Radius
-                                                      .circular(
-                                                      Size*10))
-                                          ),
-                                          children: [
-                                            Padding(
-                                              padding:
-                                               EdgeInsets
-                                                  .all(Size*8.0),
-                                              child: Text(
-                                                textAlign: TextAlign
-                                                    .center,
-                                                'Module',
-                                                style: TextStyle(
-                                                  fontSize: Size*15,
-                                                  color:
-                                                  Colors.orange,
-                                                  fontWeight:
-                                                  FontWeight
-                                                      .w500,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                               EdgeInsets
-                                                  .all(Size*8.0),
-                                              child: Text(
-                                                textAlign: TextAlign
-                                                    .center,
-                                                'Arduino Board',
-                                                style: TextStyle(
-                                                  fontSize:Size* 15,
-                                                  color:
-                                                  Colors.orange,
-                                                  fontWeight:
-                                                  FontWeight
-                                                      .w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  } else {
-                                    String subTechnicalParameters =
-                                    SubjectsData.table
-                                        .split(";")[index - 1];
-                                    return Table(
-                                      border: TableBorder.all(
-                                          width: Size*0.5,
-                                          color: Colors.white54,
-                                          borderRadius: index ==
-                                              SubjectsData.table
-                                                  .split(";")
-                                                  .length
-                                              ? BorderRadius.only(
-                                              bottomLeft: Radius
-                                                  .circular(Size*10),
-                                              bottomRight:
-                                              Radius
-                                                  .circular(
-                                                  Size*10))
-                                              : BorderRadius
-                                              .circular(0)),
-                                      defaultVerticalAlignment:
-                                      TableCellVerticalAlignment
-                                          .middle,
-                                      columnWidths: {
-                                        0: FractionColumnWidth(0.2),
-                                        1: FractionColumnWidth(0.5),
-                                      },
-                                      children: [
-                                        TableRow(
-                                          children: [
-                                            TableCell(
-                                              child: Padding(
-                                                padding:
-                                                 EdgeInsets
-                                                    .all(Size*8.0),
-                                                child: Text(
-                                                  textAlign:
-                                                  TextAlign
-                                                      .center,
-                                                  subTechnicalParameters
-                                                      .split(":")
-                                                      .first,
-                                                  style: TextStyle(
-                                                      color: Colors
-                                                          .white),
-                                                ),
-                                              ),
-                                            ),
-                                            TableCell(
-                                              child: Padding(
-                                                padding:
-                                                 EdgeInsets
-                                                    .all(Size*8.0),
-                                                child: Text(
-                                                    textAlign:
-                                                    TextAlign
-                                                        .center,
-                                                    subTechnicalParameters
-                                                        .split(":")
-                                                        .last,
-                                                    style: TextStyle(
-                                                        color: Colors
-                                                            .white)),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                },
+                              child: Padding(
+                                padding:  EdgeInsets.all(Size*5.0),
+                                child: Text(" Edit "),
                               ),
                             ),
-                          if(SubjectsData.files.isNotEmpty)
-                            Padding(
+                          ),
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>DescriptionCreator(data:SubjectsData.data ,subData: SubjectsData.subData,table: SubjectsData.table,images: SubjectsData.images,d2: SubjectsData.id, c0: widget.c0,d0: widget.d0,c1: widget.c1,d1:widget.d1,files: SubjectsData.files,)));
+                          },
+                        ),
+                        InkWell(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius:
+                              BorderRadius.circular(Size*15),
+                            ),
+                            child: Padding(
                               padding:  EdgeInsets.all(Size*5.0),
-                              child: Container(
-                                width:double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.black38,
-                                  border: Border.all(color: Colors.white24),
-                                  borderRadius: BorderRadius.circular(Size*10)
-                                ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color:Colors.white12,
-
-                                            borderRadius:
-                                            BorderRadius.only(
-                                                topRight: Radius
-                                                    .circular(Size*10),
-                                                topLeft: Radius
-                                                    .circular(
-                                                    Size*10))
+                              child: Text(" Delete "),
+                            ),
+                          ),
+                          onTap: (){
+                            widget.c1.isNotEmpty&&widget.d1.isNotEmpty?FirebaseFirestore.instance.collection(widget.c0).doc(widget.d0).collection(widget.c1).doc(widget.d1).collection("description").doc(SubjectsData.id).delete():FirebaseFirestore.instance.collection(widget.c0).doc(widget.d0).collection("description").doc(SubjectsData.id).delete();
+                          },
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (newList.length > 1)
+                          StyledTextWidget(
+                            text: SubjectsData.data,
+                            fontSize: Size*18,
+                            color: Colors.white,)
+                        else if (SubjectsData.images.isNotEmpty)
+                          StyledTextWidget(
+                            text: SubjectsData.data,
+                            fontSize: Size*18,
+                            color: Colors.white70,)
+                        else
+                          StyledTextWidget(
+                              text: "       ${SubjectsData.data}",
+                              fontSize: Size*18,
+                              color:
+                              Colors.white.withOpacity(0.9)),
+                        if (SubjectsData.images.isNotEmpty)
+                          Padding(
+                            padding:
+                            EdgeInsets.only(top:Size* 20),
+                            child: scrollingImages(
+                              images: SubjectsData.images
+                                  .split(";"),  id: widget.d1,isZoom: true,),
+                          ),
+                        if (SubjectsData.subData.isNotEmpty)
+                          ListView.builder(
+                              physics:
+                              const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: newList.length,
+                              itemBuilder: (BuildContext context,
+                                  int index) {
+                                if (newList.length > 1) {
+                                  return Padding(
+                                    padding:
+                                    EdgeInsets.all(Size*8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        Text(
+                                          "${index + 1}. ",
+                                          style:  TextStyle(
+                                              color: Colors.white,
+                                              fontSize: Size*14),
                                         ),
-                                        child: Padding(
-                                          padding:  EdgeInsets.all(Size*5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text("Code",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
-                                            ],
+                                        Expanded(
+                                            child:
+                                            StyledTextWidget(
+                                                text: newList[
+                                                index],
+                                                color: Colors
+                                                    .white.withOpacity(0.8),
+                                                fontSize:
+                                                Size*16)),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  return Padding(
+                                      padding:
+                                      EdgeInsets.all(
+                                          Size*5.0),
+                                      child: StyledTextWidget(
+                                          text: newList[index],
+                                          color: Colors
+                                              .amberAccent,
+                                          fontSize: Size*20));
+                                }
+                              }),
+                      ],
+                    ),
+                    if (SubjectsData.table.isNotEmpty)
+                      Padding(
+                        padding:  EdgeInsets.symmetric(
+                            horizontal:Size* 8, vertical:Size* 10),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics:
+                          NeverScrollableScrollPhysics(),
+                          itemCount: SubjectsData.table
+                              .split(";")
+                              .length +
+                              1, // Number of rows including the header
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Table(
+                                border: TableBorder.all(
+                                    width:Size* 0.8,
+                                    color: Colors.white70,
+                                    borderRadius:
+                                    BorderRadius.only(
+                                        topRight: Radius
+                                            .circular(Size*10),
+                                        topLeft: Radius
+                                            .circular(
+                                            Size* 10))),
+                                defaultVerticalAlignment:
+                                TableCellVerticalAlignment
+                                    .middle,
+                                columnWidths: const {
+                                  0: FractionColumnWidth(0.2),
+                                  1: FractionColumnWidth(0.5),
+                                },
+                                children: [
+                                  TableRow(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey
+                                            .withOpacity(
+                                            0.3),
+                                        borderRadius:
+                                        BorderRadius.only(
+                                            topRight: Radius
+                                                .circular(Size*10),
+                                            topLeft: Radius
+                                                .circular(
+                                                Size*10))
+                                    ),
+                                    children: [
+                                      Padding(
+                                        padding:
+                                        EdgeInsets
+                                            .all(Size*8.0),
+                                        child: Text(
+                                          textAlign: TextAlign
+                                              .center,
+                                          'Module',
+                                          style: TextStyle(
+                                            fontSize: Size*15,
+                                            color:
+                                            Colors.orange,
+                                            fontWeight:
+                                            FontWeight
+                                                .w500,
                                           ),
                                         ),
                                       ),
-
                                       Padding(
-                                        padding:  EdgeInsets.all(Size*8.0),
-                                        child: SingleChildScrollView(
-                                          physics: BouncingScrollPhysics(),
-                                          scrollDirection: Axis.horizontal,
-                                          child: SelectableText(
-                                            SubjectsData.files,
-                                            style: TextStyle(fontSize: Size*15,color: Colors.white.withOpacity(0.9)),
+                                        padding:
+                                        EdgeInsets
+                                            .all(Size*8.0),
+                                        child: Text(
+                                          textAlign: TextAlign
+                                              .center,
+                                          'Arduino Board',
+                                          style: TextStyle(
+                                            fontSize:Size* 15,
+                                            color:
+                                            Colors.orange,
+                                            fontWeight:
+                                            FontWeight
+                                                .w500,
                                           ),
                                         ),
                                       ),
                                     ],
-                                  )),
-                            )
+                                  ),
+                                ],
+                              );
+                            } else {
+                              String subTechnicalParameters =
+                              SubjectsData.table
+                                  .split(";")[index - 1];
+                              return Table(
+                                border: TableBorder.all(
+                                    width: Size*0.5,
+                                    color: Colors.white54,
+                                    borderRadius: index ==
+                                        SubjectsData.table
+                                            .split(";")
+                                            .length
+                                        ? BorderRadius.only(
+                                        bottomLeft: Radius
+                                            .circular(Size*10),
+                                        bottomRight:
+                                        Radius
+                                            .circular(
+                                            Size*10))
+                                        : BorderRadius
+                                        .circular(0)),
+                                defaultVerticalAlignment:
+                                TableCellVerticalAlignment
+                                    .middle,
+                                columnWidths: const {
+                                  0: FractionColumnWidth(0.2),
+                                  1: FractionColumnWidth(0.5),
+                                },
+                                children: [
+                                  TableRow(
+                                    children: [
+                                      TableCell(
+                                        child: Padding(
+                                          padding:
+                                          EdgeInsets
+                                              .all(Size*8.0),
+                                          child: Text(
+                                            textAlign:
+                                            TextAlign
+                                                .center,
+                                            subTechnicalParameters
+                                                .split(":")
+                                                .first,
+                                            style: TextStyle(
+                                                color: Colors
+                                                    .white),
+                                          ),
+                                        ),
+                                      ),
+                                      TableCell(
+                                        child: Padding(
+                                          padding:
+                                          EdgeInsets
+                                              .all(Size*8.0),
+                                          child: Text(
+                                              textAlign:
+                                              TextAlign
+                                                  .center,
+                                              subTechnicalParameters
+                                                  .split(":")
+                                                  .last,
+                                              style: TextStyle(
+                                                  color: Colors
+                                                      .white)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    if(SubjectsData.files.isNotEmpty)
+                      Padding(
+                        padding:  EdgeInsets.all(Size*5.0),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: 200),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.black38,
+                              // border: Border.all(color: Colors.white24),
+                              borderRadius: BorderRadius.circular(Size * 10),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white12,
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(Size * 10),
+                                      topLeft: Radius.circular(Size * 10),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical:Size * 2.0,horizontal: Size * 6.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children:  [
+                                        Text(
+                                          "Code",
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600,fontSize: 14),
+                                        ),
+                                        Spacer(),
+                                        InkWell(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(vertical: 1.8,horizontal: 8),
+                                            margin: EdgeInsets.only(right: 10),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              "full code",
+                                              style: TextStyle(color: Colors.white,fontSize: 14),
+                                            ),
+                                          ),
+                                          onTap: (){
+                                            Navigator.push(context, MaterialPageRoute(builder: (context)=>backGroundImage(
+                                                text: "Full Code",
+                                                child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: SelectableText(
+                                                  SubjectsData.files,
+                                                  style: TextStyle(fontSize: Size * 16, color: Colors.white),
+                                                ),
+                                              ),
+                                            ))));
+                                          },
+                                        ),
+                                        InkWell(
+                                          onTap: (){
+                                            copyToClipboard(context,SubjectsData.files);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(vertical: 1.8,horizontal: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              "copy code",
+                                              style: TextStyle(color: Colors.white,fontSize: 14),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SelectableText(
+                                          SubjectsData.files,
+                                          style: TextStyle(fontSize: Size * 14, color: Colors.white.withOpacity(0.9)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
 
-                        ],
-                      );
-                    },
-                    separatorBuilder: (context, index) =>
-                     SizedBox(
-                      height: Size*15,
-                    ),
+                              ],
+                            ),
+                          ),
+                        )
+
+                      )
+
+                  ],
+                );
+              },
+              separatorBuilder: (context, index) =>
+                  SizedBox(
+                    height: Size*15,
                   ),
-                ],
-              );
-            }
-        }
-      },
-    );
+            ),
+          ],
+        ),
+      );
+    }
+  },
+);
   }
 }
 
-Stream<List<DescriptionConvertor>> readAllDescription(String c0,String d0,String c1,String d1) =>
-    c1.isNotEmpty && d1.isNotEmpty?FirebaseFirestore.instance
+void copyToClipboard(BuildContext context,String text) {
+  Clipboard.setData(ClipboardData(text: text));
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text('Text copied'),
+  ));
+}
+Future<List<DescriptionConvertor>> readAllDescription(String c0, String d0, String c1, String d1) async {
+  if (c1.isNotEmpty && d1.isNotEmpty) {
+    final snapshot = await FirebaseFirestore.instance
         .collection(c0)
         .doc(d0)
         .collection(c1)
         .doc(d1)
         .collection("description")
         .orderBy("id", descending: false)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
+        .get();
+
+    return snapshot.docs
         .map((doc) => DescriptionConvertor.fromJson(doc.data()))
-        .toList()):FirebaseFirestore.instance
+        .toList();
+  } else {
+    final snapshot = await FirebaseFirestore.instance
         .collection(c0)
         .doc(d0)
         .collection("description")
         .orderBy("id", descending: false)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
+        .get();
+
+    return snapshot.docs
         .map((doc) => DescriptionConvertor.fromJson(doc.data()))
-        .toList());
+        .toList();
+  }
+}
 
 String getID() {
-  var now = new DateTime.now();
+  var now = DateTime.now();
   return DateFormat('d.M.y-kk:mm:ss').format(now);
 }
 
 class webView extends StatefulWidget {
-  const webView({required this.url});
+  const webView({super.key, required this.url});
 
   final String url;
 
@@ -972,8 +1014,7 @@ class _webViewState extends State<webView> {
 
 class tableOfContent extends StatefulWidget {
   final List list;
-  final bool isView;
-  const tableOfContent({Key? key, required this.list, this.isView = false})
+  const tableOfContent({Key? key, required this.list})
       : super(key: key);
 
   @override
@@ -981,92 +1022,68 @@ class tableOfContent extends StatefulWidget {
 }
 
 class _tableOfContentState extends State<tableOfContent> {
-  bool isView = false;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      isView = widget.isView;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     double Size = size(context);
-    return Padding(
-      padding:  EdgeInsets.all(Size*10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Row(
+    return          Padding(
+      padding:  EdgeInsets.all(Size*5.0),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(Size*20),
+            border: Border.all(color: Colors.black)),
+        child: Padding(
+          padding:  EdgeInsets.all(Size*10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-               Text(
+              Text(
                 "Table of Content : ",
                 style: TextStyle(
-                    fontSize: Size*25,
-                    fontWeight: FontWeight.w400,
+                    fontSize: Size*20,
                     color: Colors.white),
               ),
-              Spacer(),
-              InkWell(
-                child: Text(
-                  isView ? "Hide" : "View",
-                  style: TextStyle(
-                      color: Color.fromRGBO(17, 245, 237, 1),
-                      fontSize: Size*16),
+              Padding(
+                padding:
+                EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
+                child: ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.list.length,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    String name = widget.list[index];
+                    return Row(
+                      children: [
+                        Column(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: Size*5,
+                              color: Colors.white70,
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          width: Size*10,
+                        ),
+                        Text(
+                          name,
+                          style:  TextStyle(
+                              fontSize: Size*16,
+                              color: Colors.white70,),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                onTap: () {
-                  setState(() {
-                    isView = !isView;
-                  });
-                },
               ),
-              SizedBox(
-                width: Size*10,
-              )
             ],
           ),
-          if (isView)
-            Padding(
-              padding:
-               EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.list.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  String name = widget.list[index];
-                  return Row(
-                    children: [
-                      Column(
-                        children: [
-                           Icon(
-                            Icons.circle,
-                            size: Size*5,
-                            color: Colors.white70,
-                          ),
-                        ],
-                      ),
-                       SizedBox(
-                        width: Size*10,
-                      ),
-                      Text(
-                        name,
-                        style:  TextStyle(
-                            fontSize: Size*18,
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w400),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -1085,15 +1102,7 @@ class componentsAndSupplies
 }
 
 class _componentsAndSuppliesState extends State<componentsAndSupplies> {
-  bool isView = false;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      isView = widget.isView;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1109,30 +1118,12 @@ class _componentsAndSuppliesState extends State<componentsAndSupplies> {
               Text(
                 "Components And Supplies",
                 style: TextStyle(
-                    fontSize: Size*25,
-                    fontWeight: FontWeight.w400,
+                    fontSize: Size*20,
                     color: Colors.white),
               ),
-              Spacer(),
-              InkWell(
-                child: Text(
-                  isView ? "Hide" : "View",
-                  style: TextStyle(
-                      color: Color.fromRGBO(17, 245, 237, 1),
-                      fontSize: Size*16),
-                ),
-                onTap: () {
-                  setState(() {
-                    isView = !isView;
-                  });
-                },
-              ),
-              SizedBox(
-                width: Size*10,
-              )
+
             ],
           ),
-          if (isView)
             Padding(
               padding:
               EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
@@ -1162,8 +1153,7 @@ class _componentsAndSuppliesState extends State<componentsAndSupplies> {
                             name.split(";").first,
                             style:  TextStyle(
                                 fontSize: Size*18,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w400),
+                                color: Colors.white70,),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1192,9 +1182,8 @@ class _componentsAndSuppliesState extends State<componentsAndSupplies> {
 class appsAndPlatforms
     extends StatefulWidget {
   final List list;
-  final bool isView;
   const appsAndPlatforms
-      ({Key? key, required this.list, this.isView = false})
+      ({Key? key, required this.list})
       : super(key: key);
 
   @override
@@ -1202,15 +1191,6 @@ class appsAndPlatforms
 }
 
 class _appsAndPlatformsState extends State<appsAndPlatforms> {
-  bool isView = false;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      isView = widget.isView;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1221,35 +1201,12 @@ class _appsAndPlatformsState extends State<appsAndPlatforms> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Apps and platforms",
-                style: TextStyle(
-                    fontSize: Size*25,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
-              ),
-              Spacer(),
-              InkWell(
-                child: Text(
-                  isView ? "Hide" : "View",
-                  style: TextStyle(
-                      color: Color.fromRGBO(17, 245, 237, 1),
-                      fontSize: Size*16),
-                ),
-                onTap: () {
-                  setState(() {
-                    isView = !isView;
-                  });
-                },
-              ),
-              SizedBox(
-                width: Size*10,
-              )
-            ],
+          Text(
+            "Apps and platforms",
+            style: TextStyle(
+                fontSize: Size*20,
+                color: Colors.white),
           ),
-          if (isView)
             Padding(
               padding:
               EdgeInsets.only(left:Size* 20, right: Size*10, top:Size* 10),
@@ -1277,9 +1234,8 @@ class _appsAndPlatformsState extends State<appsAndPlatforms> {
                         child: Text(
                           name.split(";").first,
                           style:  TextStyle(
-                              fontSize: Size*18,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w400),
+                              fontSize: Size*16,
+                              color: Colors.white70),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1326,15 +1282,14 @@ class _RequiredState extends State<Required> {
                Text(
                 widget.heading,
                 style: TextStyle(
-                    fontSize: Size*23,
-                    fontWeight: FontWeight.w500,
+                    fontSize: Size*20,
                     color: Colors.white),
               ),
             ],
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(left:Size* 20, right: Size*10),
+          padding: EdgeInsets.only(left:Size* 20, right: Size*10,bottom:10 ),
           child: ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: widget.list.length,
@@ -1346,13 +1301,13 @@ class _RequiredState extends State<Required> {
 
               return InkWell(
                 child: Padding(
-                  padding:  EdgeInsets.all(Size*4.0),
+                  padding:  EdgeInsets.symmetric(horizontal:Size*4.0,vertical: 2),
                   child: Row(
                     children: [
                        Icon(
                         Icons.circle,
-                        size: Size*8,
-                        color: Colors.white,
+                        size: Size*5,
+                        color: Colors.white60,
                       ),
                        SizedBox(
                         width: Size*5,
@@ -1361,9 +1316,8 @@ class _RequiredState extends State<Required> {
                           child: Text(
                             name,
                             style:  TextStyle(
-                                color: Colors.white,
-                                fontSize:Size* 20,
-                                fontWeight: FontWeight.w300),
+                                color: Colors.white70,
+                                fontSize:Size* 16,),
                           )),
                     ],
                   ),
@@ -1459,21 +1413,13 @@ class _zoomState extends State<zoom> {
    }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Column(
-            children: [
-              backButton(),
-              Expanded(
-                child: Center(
-                  child: file.existsSync()?PhotoView(imageProvider: FileImage(file)):PhotoView(imageProvider:NetworkImage(widget.url),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ));
+    return backGroundImage(
+      text: "back",
+      child: Center(
+      child: file.existsSync()?PhotoView(imageProvider: FileImage(file)):PhotoView(imageProvider:NetworkImage(widget.url),
+      ),
+    ),
+    );
   }
 }
 
@@ -1482,8 +1428,8 @@ class StyledTextWidget extends StatelessWidget {
   final double fontSize;
   final Color color;
   final FontWeight fontWeight;
-  StyledTextWidget(
-      {required this.text,
+  const StyledTextWidget(
+      {super.key, required this.text,
         this.fontSize = 14,
         this.color = Colors.white,
         this.fontWeight = FontWeight.normal});
